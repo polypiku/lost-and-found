@@ -31,10 +31,10 @@ const I={
 };
 const svgURI=x=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -113 320 427">'+x+'</svg>');
 const BG=c=>`<rect y="-113" width="320" height="427" fill="${c}"/><ellipse cx="160" cy="178" rx="120" ry="10" fill="#000" opacity=".08"/>`;
-const PIC={I1:'images/item-wallet.jpg?v=202611251953',I2:'images/item-phone.jpg?v=202611251953',I3:'images/item-umbrella.jpg?v=202611251953',I4:'images/item-earbuds.jpg?v=202611251953',I5:'images/item-idcard.jpg?v=202611251953',C1:'images/claim-phone.jpg?v=202611251953'};
-const LGCLEAN='images/login-top.jpg?v=202611251953';
-const LGBOT='images/login-bottom.jpg?v=202611251953';
-const LOGO='images/logo.jpg?v=202611251953',APPIC='images/app-icon.jpg?v=202611251953';
+const PIC={I1:'images/item-wallet.jpg?v=202611260034',I2:'images/item-phone.jpg?v=202611260034',I3:'images/item-umbrella.jpg?v=202611260034',I4:'images/item-earbuds.jpg?v=202611260034',I5:'images/item-idcard.jpg?v=202611260034',C1:'images/claim-phone.jpg?v=202611260034'};
+const LGCLEAN='images/login-top.jpg?v=202611260034';
+const LGBOT='images/login-bottom.jpg?v=202611260034';
+const LOGO='images/logo.jpg?v=202611260034',APPIC='images/app-icon.jpg?v=202611260034';
 const imgOf=it=>it.img||PIC[it.id]||'';
 const CLR=c=>(COLORS.find(x=>x[0]===c)||[0,'#ccc'])[1];
 
