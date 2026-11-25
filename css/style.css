@@ -400,7 +400,7 @@ body{background:radial-gradient(1200px 700px at 50% 20%,#f6efe8,#e7ddd3);min-hei
 .splash{padding-top:var(--sat)}
 .toast{bottom:calc(var(--sab) + 90px)}
 .splash .spic{width:120px!important;height:120px;border-radius:28px;box-shadow:0 16px 36px rgba(211,84,0,.28)}.splash .spn{font-size:20px;font-weight:700;color:#d35400}
-.blurimg{filter:blur(3.5px);clip-path:inset(0 round 14px)}.hero.blurimg{filter:blur(8px)}
+.blurimg{filter:blur(2px);clip-path:inset(0 round 14px)}.hero.blurimg{filter:blur(5px)}
 .herow{position:relative;border-radius:var(--r);overflow:hidden}.herow .hero{display:block}
 .blurnote{position:absolute;inset:auto 10px 10px 10px;background:rgba(20,20,20,.62);color:#fff;font-size:12.5px;line-height:1.45;border-radius:12px;padding:8px 10px 8px 34px;backdrop-filter:blur(4px)}.blurnote svg{position:absolute;left:10px;top:10px;width:17px;height:17px}
 .tile .ic[data-c=lost]{background:linear-gradient(140deg,#ff8f8f,#e5484d)}
@@ -412,6 +412,15 @@ body{background:radial-gradient(1200px 700px at 50% 20%,#f6efe8,#e7ddd3);min-hei
 .tile .ic[data-c=manage]{background:linear-gradient(140deg,#98a2ff,#4f46e5)}
 .tile .ic[data-c=users]{background:linear-gradient(140deg,#6fb5ff,#2563eb)}
 .tile .ic[data-c=key]{background:linear-gradient(140deg,#fcd34d,#e08a00)}
+.qs2{display:flex;flex-direction:column;gap:14px;width:100%;border:2px solid var(--brand2);background:var(--paper);border-radius:24px;padding:16px;text-align:left;cursor:pointer;box-shadow:0 14px 30px rgba(211,84,0,.22);font:inherit;color:var(--ink)}
+.qs2:active{transform:scale(.98)}
+.qs2 .qt{display:flex;align-items:center;gap:12px}
+.qs2 .ic{width:50px;height:50px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center;flex:none;box-shadow:0 6px 14px rgba(211,84,0,.3)}.qs2 .ic svg{width:26px;height:26px}
+.qs2 b{display:block;font-size:18px;font-weight:700;color:var(--brandink)}.qs2 small{color:var(--muted);font-size:13px}
+.qs2 .sfake{display:flex;align-items:center;gap:8px;height:50px;border-radius:999px;background:var(--soft);border:1.5px solid var(--line2);padding:0 5px 0 16px;color:var(--muted);font-size:14px}
+.qs2 .sfake>svg{width:19px;height:19px;flex:none}.qs2 .sfake span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qs2 .sfake i{font-style:normal;background:var(--grad);color:#fff;font-weight:600;border-radius:999px;padding:0 18px;height:40px;display:grid;place-items:center;flex:none}
+.scr>.bd.home{margin-top:-58px}
 /* print report */
 #print{display:none}
 @media print{

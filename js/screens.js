@@ -20,7 +20,7 @@ const homeHd=(sub)=>`<div class="hd home"><div class="row1"><img class="appic" s
 const hello=()=>`<div class="hello"><div class="av">${S.me.role==='staff'?I.verify:I.users}</div><div><b>สวัสดี ${esc(S.me.name)}</b><small>${S.me.role==='staff'?'เจ้าหน้าที่':'ผู้ใช้ทั่วไป'} · ${S.me.id}</small></div></div>`;
 const tile=(go,ic,t,d,badge,wide)=>`<button class="tile${wide?' wide':''}" type="button" data-go="${go}"><span class="ic" data-c="${ic}">${I[ic]}</span><span class="tx"><b>${t}</b><br><small>${d}</small></span>${badge?`<span class="badge">${badge}</span>`:''}</button>`;
 V.home=()=>{const my=db.claims.filter(c=>c.by===S.me.id&&c.status==='pending').length;
- return homeHd('ศูนย์รับฝากของหาย · '+S.me.id)+`<div class="bd home"><button class="qs" type="button" data-go="search"><span class="ic">${I.search}</span><span><b>ค้นหาของที่พบ</b><small>ดูของที่มีคนเก็บได้ และยื่นขอรับคืน</small></span><span class="go">${I.chev}</span></button>
+ return homeHd('ศูนย์รับฝากของหาย · '+S.me.id)+`<div class="bd home"><button class="qs2" type="button" data-go="search"><span class="qt"><span class="ic">${I.search}</span><span><b>ทำของหายใช่ไหม?</b><small>ค้นหาของที่มีคนเก็บได้ แล้วยื่นขอรับคืน</small></span></span><span class="sfake">${I.search}<span>ค้นหาชื่อสิ่งของ หรือสถานที่</span><i>ค้นหา</i></span></button>
  <div class="sec"><span>บริการ</span></div>
  <div class="tiles">${tile('lost','lost','แจ้งของหาย','บันทึกของที่คุณทำหาย')}${tile('found','found','บันทึกของที่พบ','แจ้งของที่คุณเก็บได้')}
  ${tile('track','track','ติดตามสถานะ','ผลคำขอรับคืนของคุณ',my)}${tile('mine','list','รายการบันทึก','ดูและแก้ไขรายการที่แจ้ง')}</div></div>`};
