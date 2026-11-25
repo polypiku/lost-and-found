@@ -50,7 +50,10 @@ js/app.js           การแสดงผล ปุ่ม และการ�
 js/iphone.js        หน้าจอ iPhone แถบสถานะ และการเปิด/ปิดแอป
 images/             รูปสิ่งของ โลโก้ และภาพหน้าเข้าสู่ระบบ
 screenshots/        ภาพหน้าจอสำหรับ README
+docs/               หน้าจอทั้งหมด (PDF และรูป)
 ```
+
+หน้าจอทั้งหมด 25 หน้า (S01–S19 พร้อมหน้าจอ iPhone ปฏิทิน และการส่งออกรายงาน) ดูได้ที่ [docs/all-screens.pdf](docs/all-screens.pdf) หรือโฟลเดอร์ [docs/screens](docs/screens)
 
 ## เทคโนโลยี
 
