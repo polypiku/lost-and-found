@@ -25,16 +25,16 @@ const ICONS={
  messages:['Messages',()=>ic(['#5df06c','#16c03a'],'<path d="M30 15c11 0 19 6.5 19 15s-8 15-19 15c-2 0-4-.2-6-.7L15 47l2.5-7C13.5 37 11 33.7 11 30c0-8.5 8-15 19-15z" fill="#fff"/>')],
  music:['Music',()=>ic(['#ff6a83','#f6263d'],'<path d="M25 40V20l17-4v20" stroke="#fff" stroke-width="3" fill="none"/><circle cx="21" cy="41" r="5" fill="#fff"/><circle cx="38" cy="37" r="5" fill="#fff"/>')]
 };
-const appBtn=k=>{const [n,svg]=ICONS[k];return `<button type="button" class="app" data-app="${k}" aria-label="${n}"><span class="ai">${svg()}</span><span>${n}</span></button>`};
+const THN={camera:'กล้อง',photos:'รูปภาพ',clock:'นาฬิกา',notes:'โน้ต'};
+const appBtn=k=>{const [n0,svg]=ICONS[k];const n=LANG==='en'?n0:(THN[k]||n0);return `<button type="button" class="app" data-app="${k}" aria-label="${n}"><span class="ai">${svg()}</span><span>${n}</span></button>`};
 function drawSpring(){const d=new Date(),loc=LANG==='en'?'en-US':'th-TH';GID=0;
  SPR.innerHTML=`<div class="widget"><div class="wg"><small>${d.toLocaleDateString(loc,{weekday:'long'})}</small><b>${d.getDate()}</b><span>${d.toLocaleDateString(loc,{month:'long',year:'numeric'})}</span></div><div class="wg"><small>${LANG==='en'?'Bangkok':'กรุงเทพฯ'}</small><b>31°</b><span>${LANG==='en'?'Partly cloudy':'มีเมฆบางส่วน'}</span></div></div>
- <div class="apps"><button type="button" class="app ours" data-app="lf" aria-label="Lost and Found"><span class="ai"><img src="${APPIC}" alt=""></span><span>${LANG==='en'?'Lost&Found':'แจ้งของหาย'}</span></button>${['facetime','calendar','photos','camera','mail','notes','reminders','clock','news','tv','podcasts','appstore','maps','weather','settings'].map(appBtn).join('')}</div>
- <div class="sp2"></div><div class="pill2">${I.search}<span>${LANG==='en'?'Search':'ค้นหา'}</span></div>
- <div class="dock">${['phone','safari','messages','music'].map(appBtn).join('')}</div>`}
+ <div class="apps"><button type="button" class="app ours" data-app="lf" aria-label="Lost and Found"><span class="ai"><img src="${APPIC}" alt=""></span><span>${LANG==='en'?'Lost&Found':'แจ้งของหาย'}</span></button>${['camera','photos','clock','notes'].map(appBtn).join('')}</div>
+ <div class="sp2"></div><div class="pill2">${I.search}<span>${LANG==='en'?'Search':'ค้นหา'}</span></div>`}
 let OPEN=false;
 function openApp(from){const r=from.getBoundingClientRect(),sr=SCR.getBoundingClientRect();P.style.transformOrigin=`${r.left+r.width/2-sr.left}px ${r.top+r.height/2-sr.top}px`;
  P.classList.remove('closing');P.classList.add('open');OPEN=true;HB.classList.add('dark');
- if(!S.me){const sp=document.createElement('div');sp.className='splash';sp.setAttribute('aria-hidden','true');sp.innerHTML=`<img src="${LOGO}" alt=""><span class="ld"></span>`;P.appendChild(sp);setTimeout(()=>{sp.classList.add('out');setTimeout(()=>sp.remove(),400)},1100)}}
+ if(!S.me){const sp=document.createElement('div');sp.className='splash';sp.setAttribute('aria-hidden','true');sp.innerHTML=`<img class="spic" src="${APPIC}" alt=""><b class="spn">${LANG==='en'?'Lost &amp; Found':'แจ้งของหาย'}</b><span class="ld"></span>`;P.appendChild(sp);setTimeout(()=>{sp.classList.add('out');setTimeout(()=>sp.remove(),400)},1100)}}
 function closeApp(){if(!OPEN)return;OPEN=false;HB.classList.remove('dark');P.classList.add('closing');setTimeout(()=>P.classList.remove('open','closing'),matchMedia('(prefers-reduced-motion: reduce)').matches?0:300)}
 SPR.addEventListener('click',e=>{const b=e.target.closest('.app');if(!b)return;if(b.dataset.app==='lf')return openApp(b);
  b.classList.remove('bounce');void b.offsetWidth;b.classList.add('bounce');const t=document.createElement('div');t.className='stoast';t.textContent=LANG==='en'?'Demo icon — open Lost&Found to try the app':'ไอคอนตัวอย่าง ลองเปิดแอป “แจ้งของหาย”';SCR.appendChild(t);setTimeout(()=>t.remove(),1600)});

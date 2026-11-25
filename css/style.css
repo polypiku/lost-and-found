@@ -399,6 +399,7 @@ body{background:radial-gradient(1200px 700px at 50% 20%,#f6efe8,#e7ddd3);min-hei
 .so:hover{background:rgba(255,255,255,.36)}.so svg{width:19px;height:19px}
 .splash{padding-top:var(--sat)}
 .toast{bottom:calc(var(--sab) + 90px)}
+.splash .spic{width:120px!important;height:120px;border-radius:28px;box-shadow:0 16px 36px rgba(211,84,0,.28)}.splash .spn{font-size:20px;font-weight:700;color:#d35400}
 /* print report */
 #print{display:none}
 @media print{
