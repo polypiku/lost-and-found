@@ -403,6 +403,15 @@ body{background:radial-gradient(1200px 700px at 50% 20%,#f6efe8,#e7ddd3);min-hei
 .blurimg{filter:blur(3.5px);clip-path:inset(0 round 14px)}.hero.blurimg{filter:blur(8px)}
 .herow{position:relative;border-radius:var(--r);overflow:hidden}.herow .hero{display:block}
 .blurnote{position:absolute;inset:auto 10px 10px 10px;background:rgba(20,20,20,.62);color:#fff;font-size:12.5px;line-height:1.45;border-radius:12px;padding:8px 10px 8px 34px;backdrop-filter:blur(4px)}.blurnote svg{position:absolute;left:10px;top:10px;width:17px;height:17px}
+.tile .ic[data-c=lost]{background:linear-gradient(140deg,#ff8f8f,#e5484d)}
+.tile .ic[data-c=found]{background:linear-gradient(140deg,#5fdc9a,#1f9d55)}
+.tile .ic[data-c=track]{background:linear-gradient(140deg,#6fb5ff,#2563eb)}
+.tile .ic[data-c=list]{background:linear-gradient(140deg,#c4a1ff,#7c3aed)}
+.tile .ic[data-c=verify]{background:linear-gradient(140deg,#4fd8cb,#0f9b8e)}
+.tile .ic[data-c=report]{background:linear-gradient(140deg,#fcd34d,#e08a00)}
+.tile .ic[data-c=manage]{background:linear-gradient(140deg,#98a2ff,#4f46e5)}
+.tile .ic[data-c=users]{background:linear-gradient(140deg,#6fb5ff,#2563eb)}
+.tile .ic[data-c=key]{background:linear-gradient(140deg,#fcd34d,#e08a00)}
 /* print report */
 #print{display:none}
 @media print{
