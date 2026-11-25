@@ -31,10 +31,10 @@ const I={
 };
 const svgURI=x=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -113 320 427">'+x+'</svg>');
 const BG=c=>`<rect y="-113" width="320" height="427" fill="${c}"/><ellipse cx="160" cy="178" rx="120" ry="10" fill="#000" opacity=".08"/>`;
-const PIC={I1:'images/item-wallet.jpg',I2:'images/item-phone.jpg',I3:'images/item-umbrella.jpg',I4:'images/item-earbuds.jpg',I5:'images/item-idcard.jpg',C1:'images/claim-phone.jpg'};
-const LGCLEAN='images/login-top.jpg';
-const LGBOT='images/login-bottom.jpg';
-const LOGO='images/logo.jpg',APPIC='images/app-icon.jpg';
+const PIC={I1:'images/item-wallet.jpg?v=202611251937',I2:'images/item-phone.jpg?v=202611251937',I3:'images/item-umbrella.jpg?v=202611251937',I4:'images/item-earbuds.jpg?v=202611251937',I5:'images/item-idcard.jpg?v=202611251937',C1:'images/claim-phone.jpg?v=202611251937'};
+const LGCLEAN='images/login-top.jpg?v=202611251937';
+const LGBOT='images/login-bottom.jpg?v=202611251937';
+const LOGO='images/logo.jpg?v=202611251937',APPIC='images/app-icon.jpg?v=202611251937';
 const imgOf=it=>it.img||PIC[it.id]||'';
 const CLR=c=>(COLORS.find(x=>x[0]===c)||[0,'#ccc'])[1];
 
