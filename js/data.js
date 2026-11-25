@@ -86,7 +86,8 @@ const pill=([t,c])=>`<span class="pill ${c}">${t}</span>`;
 const H=(t,{back=true,right=''}={})=>{if(S.me&&S.stack.length===2&&NAVS[S.me.role].some(x=>x[0]===cur().s))back=false;return `<div class="hd">${back?`<button class="ib" type="button" data-a="back" aria-label="ย้อนกลับ">${I.back}</button>`:''}<h2>${t}</h2>${right}${S.me?signout:''}</div>`};
 const signout=`<button class="so" type="button" data-a="signout">${I.out}<span>ออกจากระบบ</span></button>`;
 const opts=(arr,sel)=>arr.map(x=>`<option${x===sel?' selected':''}>${esc(x)}</option>`).join('');
-const thumb=it=>imgOf(it)?`<img class="thumb" src="${imgOf(it)}" alt="">`:`<span class="thumb">${I.photo}</span>`;
+const hideImg=it=>it.type==='found'&&S.me&&S.me.role!=='staff'&&it.reporter!==S.me.id;
+const thumb=it=>imgOf(it)?`<img class="thumb${hideImg(it)?' blurimg':''}" src="${imgOf(it)}" alt="">`:`<span class="thumb">${I.photo}</span>`;
 const ILL=k=>`<svg class="ill" viewBox="0 0 160 110" aria-hidden="true"><ellipse cx="80" cy="100" rx="58" ry="7" fill="var(--track)"/>
  <path d="M40 46l38-16 38 16v38l-38 16-38-16z" fill="var(--brandsoft)" stroke="var(--brand)" stroke-width="2.5" stroke-linejoin="round"/><path d="M40 46l38 16 38-16M78 62v38" stroke="var(--brand)" stroke-width="2.5" fill="none"/><path d="M58 38l38 16v10" stroke="var(--brand)" stroke-width="2.5" fill="none" opacity=".5"/>
  ${k==='search'?'<circle cx="118" cy="36" r="16" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/><path d="M129.5 47.5l12 12" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/><path d="M112 31l12 10M124 31l-12 10" stroke="var(--bad)" stroke-width="3" stroke-linecap="round"/>'

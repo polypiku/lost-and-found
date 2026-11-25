@@ -59,7 +59,7 @@ V.search=()=>{const t=S.f.t||'found',c=S.f.c||'';
  <div id="res" style="display:flex;flex-direction:column;gap:10px">${searchResults()}</div></div>`};
 V.detail=()=>{const it=item(cur().id),f=it.type==='found',mine=it.reporter===S.me.id;const canClaim=S.me.role==='user'&&f&&!mine&&it.status!=='returned';
  const pend=db.claims.find(c=>c.item===it.id&&c.by===S.me.id&&c.status==='pending');
- return H('รายละเอียดรายการ')+`<div class="bd">${imgOf(it)?`<img class="hero" src="${imgOf(it)}" alt="${esc(it.name)}">`:''}
+ return H('รายละเอียดรายการ')+`<div class="bd">${imgOf(it)?(hideImg(it)?`<div class="herow"><img class="hero blurimg" src="${imgOf(it)}" alt=""><span class="blurnote">${I.lock}รูปถูกเบลอเพื่อป้องกันการแอบอ้าง<br>เจ้าหน้าที่จะเทียบรูปจริงให้ตอนตรวจสอบ</span></div>`:`<img class="hero" src="${imgOf(it)}" alt="${esc(it.name)}">`):''}
  <div><div style="font-weight:600;font-size:18px">${esc(it.name)}</div><div style="margin-top:6px">${pill(stOf(it))}</div></div>
  <div class="kv"><div><span>ประเภท</span><span>${f?'ของที่พบ':'ของหาย'}</span></div><div><span>หมวดหมู่</span><span>${esc(it.cat)}</span></div>
  <div><span>${f?'สถานที่ที่พบ':'สถานที่ที่ทำหาย'}</span><span>${esc(it.place)}</span></div><div><span>${f?'วันที่พบ':'วันที่ทำหาย'}</span><span>${thd(it.date)}</span></div>
