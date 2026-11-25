@@ -55,6 +55,8 @@ docs/               หน้าจอทั้งหมด (PDF และรู
 
 หน้าจอทั้งหมด 25 หน้า (S01–S19 พร้อมหน้าจอ iPhone ปฏิทิน และการส่งออกรายงาน) ดูได้ที่ [docs/all-screens.pdf](docs/all-screens.pdf) หรือโฟลเดอร์ [docs/screens](docs/screens)
 
+ลำดับหน้าจอของแต่ละ Use Case (Screen Flow) ดูได้ที่ [docs/use-case-flows.pdf](docs/use-case-flows.pdf)
+
 ## เทคโนโลยี
 
 HTML, CSS และ JavaScript ไม่ต้องติดตั้งอะไรเพิ่ม ไฟล์ JavaScript โหลดตามลำดับใน `index.html`
