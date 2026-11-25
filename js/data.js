@@ -1,5 +1,5 @@
 /* Icons, sample photos and sample data */
-const COLORS=[['ดำ','#222'],['ขาว','#fff'],['แดง','#d93b30'],['น้ำตาล','#8b5a2b'],['น้ำเงิน','#1f4fa3'],['ฟ้า','#6ec1f0'],['ชมพู','#f59ac0'],['ม่วง','#8e5bd0'],['เขียว','#3a9d4a'],['เหลือง','#f5c400'],['ส้ม','#f07a16'],['เงิน','linear-gradient(135deg,#eee,#9aa0a6)'],['อื่น ๆ','conic-gradient(#f5c400,#d35400,#1f4fa3,#3a9d4a,#f5c400)']];
+const COLORS=[['ดำ','#222'],['ขาว','#fff'],['แดง','#d93b30'],['น้ำตาล','#8b5a2b'],['น้ำเงิน','#1f4fa3'],['ฟ้า','#6ec1f0'],['ชมพู','#f59ac0'],['ม่วง','#8e5bd0'],['เขียว','#3a9d4a'],['เหลือง','#f5c400'],['ส้ม','#b9533a'],['เงิน','linear-gradient(135deg,#eee,#9aa0a6)'],['อื่น ๆ','conic-gradient(#f5c400,#a9442e,#1f4fa3,#3a9d4a,#f5c400)']];
 const CNAMES=COLORS.map(c=>c[0]);
 const FEATS=['มีรอยขีดข่วน','มีพวงกุญแจ','มีสติกเกอร์','มีบัตรอยู่ข้างใน','ไม่มีจุดเด่น'];
 const RANGES=(()=>{const r=[];for(const m of [7,8,9,10,11]){const last=new Date(2026,m+1,0).getDate();for(const[a,b]of[[1,7],[8,15],[16,23],[24,last]])r.push({a:new Date(2026,m,a),b:new Date(2026,m,b),t:`${a}–${b} ${MTH[m]} 69`})}return r})();
