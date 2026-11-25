@@ -30,7 +30,8 @@ const appBtn=k=>{const [n0,svg]=ICONS[k];const n=LANG==='en'?n0:(THN[k]||n0);ret
 function drawSpring(){const d=new Date(),loc=LANG==='en'?'en-US':'th-TH';GID=0;
  SPR.innerHTML=`<div class="widget"><div class="wg"><small>${d.toLocaleDateString(loc,{weekday:'long'})}</small><b>${d.getDate()}</b><span>${d.toLocaleDateString(loc,{month:'long',year:'numeric'})}</span></div><div class="wg"><small>${LANG==='en'?'Bangkok':'กรุงเทพฯ'}</small><b>31°</b><span>${LANG==='en'?'Partly cloudy':'มีเมฆบางส่วน'}</span></div></div>
  <div class="apps"><button type="button" class="app ours" data-app="lf" aria-label="Lost and Found"><span class="ai"><img src="${APPIC}" alt=""></span><span>${LANG==='en'?'Lost&Found':'แจ้งของหาย'}</span></button>${['camera','photos','clock','notes'].map(appBtn).join('')}</div>
- <div class="sp2"></div><div class="pill2">${I.search}<span>${LANG==='en'?'Search':'ค้นหา'}</span></div>`}
+ <div class="sp2"></div><div class="pill2">${I.search}<span>${LANG==='en'?'Search':'ค้นหา'}</span></div>
+ <div class="dock">${['phone','safari','messages','music'].map(appBtn).join('')}</div>`}
 let OPEN=false;
 function openApp(from){const r=from.getBoundingClientRect(),sr=SCR.getBoundingClientRect();P.style.transformOrigin=`${r.left+r.width/2-sr.left}px ${r.top+r.height/2-sr.top}px`;
  P.classList.remove('closing');P.classList.add('open');OPEN=true;HB.classList.add('dark');
