@@ -1,6 +1,6 @@
 /* Rendering, events and actions */
 /* ---------- render ---------- */
-const KEY='lostfound-db-v4';const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}};
+const KEY='lostfound-db-v5';const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}};
 let DIR='';
 function render(top){persist();const c=cur();const bd=$('#phone .bd'),st=bd&&!top?bd.scrollTop:0;
  const keep=top?null:[...document.querySelectorAll('#phone .scr input,#phone .scr select,#phone .scr textarea')].map(x=>[x.id,x.name,x.type,x.value,x.checked]);
