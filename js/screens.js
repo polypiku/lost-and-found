@@ -55,7 +55,7 @@ const searchResults=()=>{const L=searchList();return `<div class="sec"><span>พ
 V.search=()=>{const t=S.f.t||'found',c=S.f.c||'';
  return H('ค้นหารายการ')+`<div class="bd"><div class="sbox">${I.search}<input class="fld" id="sq" type="search" placeholder="ชื่อสิ่งของ สถานที่ หรือรายละเอียด" value="${esc(S.f.q||'')}" aria-label="คำค้น"></div>
  <div class="seg" role="tablist">${[['found','ของที่พบ'],['lost','ของหาย'],['all','ทั้งหมด']].map(([k,l])=>`<button type="button" role="tab" aria-selected="${t===k}" class="${t===k?'on':''}" data-a="setT" data-v="${k}">${l}</button>`).join('')}</div>
- ${grid(['',...db.cats].map(x=>chipR('sc',x,x===c,'',x||'ทุกหมวด')).join(''),3).replace('class="ogrid c3"','class="ogrid c3 flt"')}
+ <label class="catsel"><span>${I.list}หมวดหมู่</span><select class="fld" name="sc" aria-label="หมวดหมู่">${['',...db.cats].map(x=>`<option value="${esc(x)}"${x===c?' selected':''}>${esc(x||'ทุกหมวด')}</option>`).join('')}</select></label>
  <div id="res" style="display:flex;flex-direction:column;gap:10px">${searchResults()}</div></div>`};
 V.detail=()=>{const it=item(cur().id),f=it.type==='found',mine=it.reporter===S.me.id;const canClaim=S.me.role==='user'&&f&&!mine&&it.status!=='returned';
  const pend=db.claims.find(c=>c.item===it.id&&c.by===S.me.id&&c.status==='pending');
