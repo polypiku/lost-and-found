@@ -35,6 +35,23 @@ A clickable prototype of a university lost-and-found center, shown inside an iPh
 <img src="screenshots/04-verify-en.png" width="200">
 </p>
 
+## โครงสร้างไฟล์
+
+```
+index.html          โครงหน้า (กรอบ iPhone)
+css/style.css       หน้าตาทั้งหมด
+js/core.js          ฟังก์ชันช่วย วันที่ และค่าคงที่
+js/i18n.js          ภาษาไทย / อังกฤษ
+js/data.js          ไอคอน รูปตัวอย่าง และข้อมูลตัวอย่าง
+js/screens.js       หน้าจอของแอป (S01–S19)
+js/calendar.js      ปฏิทินเลือกวันที่
+js/dialogs.js       กล่องข้อความ ส่งออกรายงาน (Excel / PDF) และรูปภาพ
+js/app.js           การแสดงผล ปุ่ม และการทำงานของแต่ละเมนู
+js/iphone.js        หน้าจอ iPhone แถบสถานะ และการเปิด/ปิดแอป
+images/             รูปสิ่งของ โลโก้ และภาพหน้าเข้าสู่ระบบ
+screenshots/        ภาพหน้าจอสำหรับ README
+```
+
 ## เทคโนโลยี
 
-HTML, CSS, JavaScript ไฟล์เดียว ไม่ต้องติดตั้ง
+HTML, CSS และ JavaScript ไม่ต้องติดตั้งอะไรเพิ่ม ไฟล์ JavaScript โหลดตามลำดับใน `index.html`
