@@ -1,6 +1,6 @@
 /* Rendering, events and actions */
 /* ---------- render ---------- */
-const KEY='lostfound-db-v5';const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}};
+const KEY='lostfound-db-v6';const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}};
 let DIR='';
 function render(top){persist();const c=cur();const bd=$('#phone .bd'),st=bd&&!top?bd.scrollTop:0;
  const keep=top?null:[...document.querySelectorAll('#phone .scr input,#phone .scr select,#phone .scr textarea')].map(x=>[x.id,x.name,x.type,x.value,x.checked]);
@@ -20,6 +20,7 @@ P.addEventListener('input',e=>{const t=e.target;
  if(t.id==='qn')S.f.qn=t.value;
  if(t.classList.contains('err')){t.classList.remove('err')}});
 P.addEventListener('change',e=>{const t=e.target;
+ if(t.closest&&t.closest('.colsel')){const d=t.parentNode.querySelector('.dot');if(d)d.style.background=t.value?CLR(t.value):'#fff';t.closest('.colsel').classList.remove('err')}
  if(t.id==='iImg'&&t.files[0]){shrink(t.files[0],d=>{S.f.img=d;refreshPhoto()});t.value='';return}
  if(t.id==='cImg'&&t.files.length){const fs=[...t.files].slice(0,3-(S.f.cimgs||[]).length);fs.forEach(f=>shrink(f,d=>{S.f.cimgs=(S.f.cimgs||[]).concat(d).slice(0,3);$('#cStrip').innerHTML=claimStrip(S.f.cimgs)}));t.value='';return}
  if(t.name==='sc'){S.f.c=t.value;$('#res').innerHTML=searchResults();return}
@@ -81,7 +82,7 @@ P.addEventListener('click',e=>{const b=e.target.closest('[data-go],[data-a]');if
  };
  A[a]&&A[a]();});
 function saveItem(kind,it){const found=kind==='found'||it?.type==='found';
- const name=val('iName'),date=val('iDate'),color=$('input[name=iColor]:checked')?.value||'',feats=$$('input[name=iF]:checked').map(x=>x.value);
+ const name=val('iName'),date=val('iDate'),color=val('iColor'),feats=$$('input[name=iF]:checked').map(x=>x.value);
  const dep=found?val('iDep'):'',stf=found?val('iStaff'):'';
  const bad=[['iName',!name],['iPlace',!val('iPlace')],['iDate',!date||date>today()]].concat(found?[['iColorBox',!color],['iFBox',!feats.length],['iDep',!dep],['iStaff',!stf]]:[]);
  bad.forEach(([id,b])=>{const el=id==='iDate'?$('[data-t=iDate]'):$('#'+id);el?.classList.toggle('err',b)});

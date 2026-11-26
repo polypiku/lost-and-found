@@ -1,5 +1,5 @@
 /* Icons, sample photos and sample data */
-const COLORS=[['ดำ','#222'],['ขาว','#fff'],['แดง','#d93b30'],['น้ำตาล','#8b5a2b'],['น้ำเงิน','#1f4fa3'],['ฟ้า','#6ec1f0'],['ชมพู','#f59ac0'],['ม่วง','#8e5bd0'],['เขียว','#3a9d4a'],['เหลือง','#f5c400'],['ส้ม','#e41d30'],['เงิน','linear-gradient(135deg,#eee,#9aa0a6)'],['อื่น ๆ','conic-gradient(#f5c400,#e41d30,#1f4fa3,#3a9d4a,#f5c400)']];
+const COLORS=[['ดำ','#222'],['ขาว','#fff'],['แดง','#d93b30'],['น้ำตาล','#8b5a2b'],['น้ำเงิน','#1f4fa3'],['ฟ้า','#6ec1f0'],['ชมพู','#f59ac0'],['ม่วง','#8e5bd0'],['เขียว','#3a9d4a'],['เหลือง','#f5c400'],['ส้ม','#f28c28'],['เทา','#8a8f98'],['ครีม / เบจ','#e8d8b8'],['กรมท่า','#1b2a4a'],['เงิน','linear-gradient(135deg,#eee,#9aa0a6)'],['ทอง','linear-gradient(135deg,#f7e08a,#c79a2a)'],['ใส / โปร่งใส','repeating-linear-gradient(45deg,#fff 0 3px,#dfe6ee 3px 6px)'],['ลายผสม','linear-gradient(90deg,#222 0 33%,#fff 33% 66%,#d93b30 66%)'],['อื่น ๆ','conic-gradient(#f5c400,#e41d30,#1f4fa3,#3a9d4a,#f5c400)']];
 const CNAMES=COLORS.map(c=>c[0]);
 const FEATS=['มีรอยขีดข่วน','มีพวงกุญแจ','มีสติกเกอร์','มีบัตรอยู่ข้างใน','ไม่มีจุดเด่น'];
 const RANGES=(()=>{const r=[];for(const m of [7,8,9,10,11]){const last=new Date(2026,m+1,0).getDate();for(const[a,b]of[[1,7],[8,15],[16,23],[24,last]])r.push({a:new Date(2026,m,a),b:new Date(2026,m,b),t:`${a}–${b} ${MTH[m]} 69`})}return r})();
@@ -31,10 +31,10 @@ const I={
 };
 const svgURI=x=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -113 320 427">'+x+'</svg>');
 const BG=c=>`<rect y="-113" width="320" height="427" fill="${c}"/><ellipse cx="160" cy="178" rx="120" ry="10" fill="#000" opacity=".08"/>`;
-const PIC={I1:'images/item-wallet.jpg?v=202611260034',I2:'images/item-phone.jpg?v=202611260034',I3:'images/item-umbrella.jpg?v=202611260034',I4:'images/item-earbuds.jpg?v=202611260034',I5:'images/item-idcard.jpg?v=202611260034',C1:'images/claim-phone.jpg?v=202611260034'};
-const LGCLEAN='images/login-top.jpg?v=202611260034';
-const LGBOT='images/login-bottom.jpg?v=202611260034';
-const LOGO='images/logo.jpg?v=202611260034',APPIC='images/app-icon.jpg?v=202611260034';
+const PIC={I1:'images/item-wallet.jpg?v=202611262254',I2:'images/item-phone.jpg?v=202611262254',I3:'images/item-umbrella.jpg?v=202611262254',I4:'images/item-earbuds.jpg?v=202611262254',I5:'images/item-idcard.jpg?v=202611262254',C1:'images/claim-phone.jpg?v=202611262254'};
+const LGCLEAN='images/login-top.jpg?v=202611262254';
+const LGBOT='images/login-bottom.jpg?v=202611262254';
+const LOGO='images/logo.jpg?v=202611262254',APPIC='images/app-icon.jpg?v=202611262254';
 const imgOf=it=>it.img||PIC[it.id]||'';
 const CLR=c=>(COLORS.find(x=>x[0]===c)||[0,'#ccc'])[1];
 
@@ -47,13 +47,13 @@ function seed(){
    {id:'staff01',pw:'1234',name:'เจ้าหน้าที่ เอ',role:'staff',phone:'02-312-6300'},
    {id:'staff02',pw:'1234',name:'เจ้าหน้าที่ บี',role:'staff',phone:'02-312-6301'}],
   perms:{verify:true,report:true,manage:true},
-  cats:['กระเป๋า','อุปกรณ์ไอที','บัตรต่างๆ','ของใช้ส่วนตัว','อื่น ๆ'],
+  cats:['กระเป๋า','เงิน / ของมีค่า','โทรศัพท์มือถือ','อุปกรณ์ไอที','บัตรต่างๆ','กุญแจ','เอกสาร / หนังสือ','เสื้อผ้า / เครื่องแต่งกาย','เครื่องประดับ / นาฬิกา','แว่นตา','ขวดน้ำ / กระติก','ร่ม','เครื่องเขียน','อุปกรณ์กีฬา','ของใช้ส่วนตัว','อื่น ๆ'],
   places:['โรงอาหารกลาง','ห้องสมุด','อาคารเรียน 2'],
   retention:90,
   items:[
    {id:'I1',type:'found',name:'กระเป๋าสตางค์สีดำ',cat:'กระเป๋า',place:'โรงอาหารกลาง',date:'2026-09-10',secret:{color:'ดำ',feats:['มีรอยขีดข่วน','มีบัตรอยู่ข้างใน']},deposit:'ห้องกิจการนักศึกษา',receivedBy:'staff01',reporter:'670222',status:'waiting'},
-   {id:'I2',type:'found',name:'โทรศัพท์มือถือ เคสสีฟ้า',cat:'อุปกรณ์ไอที',place:'ห้องสมุด',date:'2026-09-12',secret:{color:'ฟ้า',feats:['มีสติกเกอร์']},deposit:'เคาน์เตอร์ห้องสมุด',receivedBy:'staff02',reporter:'670222',status:'waiting'},
-   {id:'I3',type:'found',name:'ร่มสีน้ำเงิน',cat:'ของใช้ส่วนตัว',place:'อาคารเรียน 2',date:'2026-09-03',secret:{color:'น้ำเงิน',feats:['ไม่มีจุดเด่น']},deposit:'ห้องกิจการนักศึกษา',receivedBy:'staff01',reporter:'670222',status:'returned'},
+   {id:'I2',type:'found',name:'โทรศัพท์มือถือ เคสสีฟ้า',cat:'โทรศัพท์มือถือ',place:'ห้องสมุด',date:'2026-09-12',secret:{color:'ฟ้า',feats:['มีสติกเกอร์']},deposit:'เคาน์เตอร์ห้องสมุด',receivedBy:'staff02',reporter:'670222',status:'waiting'},
+   {id:'I3',type:'found',name:'ร่มสีน้ำเงิน',cat:'ร่ม',place:'อาคารเรียน 2',date:'2026-09-03',secret:{color:'น้ำเงิน',feats:['ไม่มีจุดเด่น']},deposit:'ห้องกิจการนักศึกษา',receivedBy:'staff01',reporter:'670222',status:'returned'},
    {id:'I4',type:'lost',name:'หูฟังไร้สายสีขาว',cat:'อุปกรณ์ไอที',place:'ห้องสมุด',date:'2026-09-05',detail:'เคสมีสติกเกอร์หัวใจสีชมพู',reporter:'670111',status:'waiting'},
    {id:'I5',type:'lost',name:'บัตรนักศึกษา',cat:'บัตรต่างๆ',place:'โรงอาหารกลาง',date:'2026-09-18',detail:'',reporter:'670222',status:'waiting'}],
   claims:[
@@ -99,3 +99,4 @@ const chipR=(name,v,on,extra='',lab)=>`<label class="opt2"><input type="radio" n
 const chipC=(name,v,on)=>`<label class="opt2 sq"><input type="checkbox" name="${name}" value="${esc(v)}"${on?' checked':''}><span><i class="mk"></i>${esc(v)}</span></label>`;
 const grid=(html,cols=3,id='')=>`<div class="ogrid c${cols}"${id?` id="${id}"`:''}>${html}</div>`;
 const colorChips=(name,sel)=>COLORS.map(([c,h])=>chipR(name,c,c===sel,`<i class="dot" style="background:${h}"></i>`)).join('');
+const colorSel=(name,sel,box)=>`<div class="colsel"${box?` id="${box}"`:''}><i class="dot" style="background:${sel?CLR(sel):'#fff'}"></i><select class="fld" name="${name}" id="${name}" aria-label="สีของสิ่งของ"><option value="">— เลือกสี —</option>${COLORS.map(([c])=>`<option value="${esc(c)}"${c===sel?' selected':''}>${esc(c)}</option>`).join('')}</select></div>`;

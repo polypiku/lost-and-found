@@ -38,7 +38,7 @@ function itemForm(kind,it={}){const f=kind==='found'||it.type==='found';const im
  <div class="field"><label for="iDetail">${f?'รายละเอียดทั่วไป':'รายละเอียดเพิ่มเติม'} <small>(ไม่บังคับ)</small></label><textarea class="fld" id="iDetail" placeholder="${f?'สิ่งที่ทุกคนเห็นได้ เช่น ขนาด ยี่ห้อ':'เช่น ยี่ห้อ ตำหนิ ของที่อยู่ข้างใน'}">${esc(it.detail||'')}</textarea></div>
 </div>
  ${f?`<div class="panel secret"><div class="ptitle">${I.lock}ข้อมูลลับสำหรับยืนยันเจ้าของ</div><div class="hint" style="margin-top:-6px">ข้อมูลส่วนนี้ไม่แสดงต่อผู้อื่น ใช้เทียบกับคำตอบของผู้ขอรับคืน</div>
-  <div class="field"><span class="lab">สีของสิ่งของ</span>${grid(colorChips('iColor',it.secret?.color),3,'iColorBox')}</div>
+  <div class="field"><span class="lab">สีของสิ่งของ</span>${colorSel('iColor',it.secret?.color,'iColorBox')}</div>
   <div class="field"><span class="lab">ลักษณะเด่น <small>(เลือกได้หลายข้อ)</small></span>${grid(FEATS.map(x=>chipC('iF',x,it.secret?.feats?.includes(x))).join(''),2,'iFBox')}</div></div>
  <div class="panel"><div class="ptitle">${I.inbox}การฝากของ</div>
   <div class="field"><label for="iDep">สถานที่ฝาก</label><input class="fld" id="iDep" placeholder="เช่น ห้องกิจการนักศึกษา" value="${esc(it.deposit||'')}"></div>
@@ -72,7 +72,7 @@ V.detail=()=>{const it=item(cur().id),f=it.type==='found',mine=it.reporter===S.m
  ${canClaim&&!pend?`<div class="ft"><button class="btn pri" type="button" data-a="toClaim">ยื่นคำขอรับของคืน</button></div>`:''}`};
 V.claim=()=>{const it=item(cur().id),e=S.f.err||{},a=S.f;const imgs=a.cimgs||[];
  return H('ยื่นคำขอรับคืน')+`<div class="bd"><div class="item off" style="opacity:1">${thumb(it)}<span class="t"><b>${esc(it.name)}</b><small>ตอบคำถามเพื่อยืนยันว่าคุณเป็นเจ้าของ</small></span></div>
- <fieldset class="q${e.qc?' err':''}"><legend><span class="num">1</span>สีของสิ่งของ</legend>${grid(colorChips('qc',a.qc),3)}</fieldset>
+ <fieldset class="q${e.qc?' err':''}"><legend><span class="num">1</span>สีของสิ่งของ</legend>${colorSel('qc',a.qc)}</fieldset>
  <fieldset class="q${e.qf?' err':''}"><legend><span class="num">2</span>ลักษณะเด่น <small>(เลือกได้หลายข้อ)</small></legend>${grid(FEATS.map(x=>chipC('qf',x,(a.qf||[]).includes(x))).join(''),2)}</fieldset>
  <fieldset class="q${e.qp?' err':''}"><legend><span class="num">3</span>สถานที่ที่คาดว่าทำหาย</legend>${grid(db.places.concat('อื่น ๆ').map(x=>chipR('qp',x,a.qp===x)).join(''),2)}</fieldset>
  <fieldset class="q${e.qr?' err':''}"><legend><span class="num">4</span>วันที่ทำหาย</legend>${dateBtn('qr',a.qr||'','qrL')}<span class="hint" id="qrL">เลือกวันที่คุณคิดว่าทำของหาย ระบบยอมรับคลาดเคลื่อนได้ไม่เกิน 3 วัน</span></fieldset>
