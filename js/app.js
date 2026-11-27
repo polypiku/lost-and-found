@@ -68,6 +68,7 @@ P.addEventListener('click',e=>{const b=e.target.closest('[data-go],[data-a]');if
   pickCImg:()=>$('#cImg')?.click(),
   rmCImg:()=>{S.f.cimgs.splice(+b.dataset.i,1);$('#cStrip').innerHTML=claimStrip(S.f.cimgs)},
   zoom:()=>{const z=document.createElement('div');z.className='zoom';z.innerHTML=`<img src="${b.src}" alt="${esc(b.alt)}">`;z.onclick=()=>z.remove();P.appendChild(z)},
+  repF:()=>{S.f.rf=b.dataset.v;render();$('#repList')?.scrollIntoView({block:'start',behavior:'smooth'})},
   setT:()=>{S.f.t=b.dataset.v;const q=S.f.q,c=S.f.c;render();const n=$('#sq');if(n&&q){n.value=q}},
   saveItem:()=>saveItem(b.dataset.k),
   saveEdit:()=>saveItem(null,item(cur().id)),
