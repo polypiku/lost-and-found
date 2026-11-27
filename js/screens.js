@@ -21,7 +21,6 @@ const hello=()=>`<div class="hello"><div class="av">${S.me.role==='staff'?I.veri
 const tile=(go,ic,t,d,badge,wide)=>`<button class="tile${wide?' wide':''}" type="button" data-go="${go}"><span class="ic" data-c="${ic}">${I[ic]}</span><span class="tx"><b>${t}</b><br><small>${d}</small></span>${badge?`<span class="badge">${badge}</span>`:''}</button>`;
 V.home=()=>{const my=db.claims.filter(c=>c.by===S.me.id&&c.status==='pending').length;
  return homeHd('ศูนย์รับฝากของหาย · '+S.me.id)+`<div class="bd home"><button class="qs2" type="button" data-go="search"><span class="qt"><span class="ic">${I.search}</span><span><b>ทำของหายใช่ไหม?</b><small>ค้นหาของที่มีคนเก็บได้ แล้วยื่นขอรับคืน</small></span></span><span class="sfake">${I.search}<span>ค้นหาชื่อสิ่งของ หรือสถานที่</span><i>ค้นหา</i></span></button>
- ${(()=>{const L=db.items.filter(i=>i.reporter===S.me.id&&i.type==='lost').flatMap(i=>matchesFor(i).map(x=>[i,x]));return L.length?`<button class="mcard" type="button" data-go="detail" data-id="${L[0][0].id}"><span class="ic">${I.spark}</span><span class="tx"><b>อาจพบของที่คุณแจ้งหายแล้ว</b><small>มีของที่พบ ${L.length} รายการ ที่อาจตรงกับ “${esc(L[0][0].name)}”</small></span>${I.chev}</button>`:''})()}
  <div class="sec"><span>บริการ</span></div>
  <div class="tiles">${tile('lost','lost','แจ้งของหาย','บันทึกของที่คุณทำหาย')}${tile('found','found','บันทึกของที่พบ','แจ้งของที่คุณเก็บได้')}
  ${tile('track','track','ติดตามสถานะ','ผลคำขอรับคืนของคุณ',my)}${tile('mine','list','รายการบันทึก','ดูและแก้ไขรายการที่แจ้ง')}</div></div>`};
