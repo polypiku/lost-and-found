@@ -32,10 +32,10 @@ const I={
 };
 const svgURI=x=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -113 320 427">'+x+'</svg>');
 const BG=c=>`<rect y="-113" width="320" height="427" fill="${c}"/><ellipse cx="160" cy="178" rx="120" ry="10" fill="#000" opacity=".08"/>`;
-const PIC={I7:'images/item-earbuds.jpg?v=202611271852',I1:'images/item-wallet.jpg?v=202611271852',I2:'images/item-phone.jpg?v=202611271852',I3:'images/item-umbrella.jpg?v=202611271852',I4:'images/item-earbuds.jpg?v=202611271852',I5:'images/item-idcard.jpg?v=202611271852',C1:'images/claim-phone.jpg?v=202611271852'};
-const LGCLEAN='images/login-top.jpg?v=202611271852';
-const LGBOT='images/login-bottom.jpg?v=202611271852';
-const LOGO='images/logo.jpg?v=202611271852',APPIC='images/app-icon.jpg?v=202611271852';
+const PIC={I7:'images/item-earbuds.jpg?v=202611271904',I1:'images/item-wallet.jpg?v=202611271904',I2:'images/item-phone.jpg?v=202611271904',I3:'images/item-umbrella.jpg?v=202611271904',I4:'images/item-earbuds.jpg?v=202611271904',I5:'images/item-idcard.jpg?v=202611271904',C1:'images/claim-phone.jpg?v=202611271904'};
+const LGCLEAN='images/login-top.jpg?v=202611271904';
+const LGBOT='images/login-bottom.jpg?v=202611271904';
+const LOGO='images/logo.jpg?v=202611271904',APPIC='images/app-icon.jpg?v=202611271904';
 const imgOf=it=>it.img||PIC[it.id]||'';
 const dueOf=it=>addDays(it.date,db.retention);
 const dueState=it=>{if(it.type!=='found'||it.status!=='waiting')return'';const d=(new Date(dueOf(it)+'T00:00')-new Date(today()+'T00:00'))/864e5;return d<0?'over':d<=14?'near':''};
@@ -53,6 +53,12 @@ const depotOf=n=>db.depots.find(d=>d.name===n);
 const newCode=()=>'LF-'+String((new Date().getFullYear()+543)%100).padStart(2,'0')+'-'+String(db.codeSeq++).padStart(4,'0');
 const placeLbl=p=>p?(PCODE[p]?PCODE[p]+' · ':'')+p:'';
 const pickBtn=(id,v,ph,list)=>`<input type="hidden" id="${id}" value="${esc(v||'')}"><button type="button" class="fld pick" data-a="pick" data-t="${id}" data-l="${list}" data-ph="${esc(ph)}"><span${v?'':' class="phx"'}>${esc(v?placeLbl(v):ph)}</span>${I.search}</button>`;
+const PERMS=[['intake','รับฝากของที่พบ','บันทึกของที่มีคนนำมาส่ง ออกรหัสและป้าย'],['verify','ตรวจสอบและอนุมัติคำขอ','อนุมัติ ปฏิเสธ หรือขอตรวจสอบเพิ่มเติม'],['money','อนุมัติคำขอเงินสด','ต้องมีสิทธิ์ตรวจสอบคำขอด้วย'],['handover','ส่งมอบของให้เจ้าของ','ยืนยันการคืนของที่จุดรับฝาก'],['notify','แจ้งเจ้าของจากรหัสนักศึกษา','ส่งแจ้งเตือนเมื่อของมีชื่อหรือรหัสเจ้าของ'],['dispose','จัดการของที่เกินกำหนด','ส่งต่อ บริจาค หรือทำลายตามระเบียบ'],['private','ดูข้อมูลติดต่อผู้แจ้ง','เห็นเบอร์โทรเต็ม ถ้าปิดจะเห็นแบบปิดบางส่วน'],['report','ดูรายงานสรุปผล','สถิติรายเดือนและสถานที่ที่พบบ่อย'],['export','ส่งออกรายงาน','ดาวน์โหลด Excel / PDF'],['logs','ดูประวัติการใช้งาน','ตรวจสอบย้อนหลังว่าใครทำอะไร'],['settings','ตั้งค่าทั่วไป','สถานที่ หมวดหมู่ จุดรับฝาก ระยะเวลา'],['accounts','จัดการบัญชีและสิทธิ์','กำหนดบทบาท กลุ่ม และสิทธิ์']];
+const GROUPS=[['counter','เจ้าหน้าที่จุดรับฝาก','จุดรับฝาก'],['verifier','เจ้าหน้าที่ตรวจสอบ','ตรวจสอบ'],['admin','หัวหน้างาน / ผู้ดูแลระบบ','หัวหน้า']];
+const gName=g=>(GROUPS.find(x=>x[0]===g)||[0,'เจ้าหน้าที่'])[1];
+const can=k=>!!S.me&&S.me.role==='staff'&&(db.gperms?.[S.me.group||'counter']||[]).includes(k);
+const canManage=()=>can('accounts')||can('settings')||can('logs');
+const maskPhone=p=>p?p.replace(/\d(?=[\d-]{4})/g,'x'):'-';
 const MONEY='เงินสด',isMoney=it=>!!it&&it.cat===MONEY;
 const NOTES=['1,000','500','100','50','20','เหรียญ'];
 const MBOX=['กระเป๋าสตางค์','ซองจดหมาย','ถุง / ซองพลาสติก','พับไว้ ไม่มีภาชนะ','อื่น ๆ'];
@@ -83,9 +89,11 @@ function seed(){
    {id:'670111',pw:'1234',name:'สมหญิง รักเรียน',role:'user',phone:'081-234-5678'},
    {id:'670222',pw:'1234',name:'สมชาย ใจดี',role:'user',phone:'089-765-4321'},
    {id:'670333',pw:'1234',name:'สมศรี ตั้งใจ',role:'user',phone:'086-555-1234'},
-   {id:'staff01',pw:'1234',name:'เจ้าหน้าที่ เอ',role:'staff',phone:'02-312-6300'},
-   {id:'staff02',pw:'1234',name:'เจ้าหน้าที่ บี',role:'staff',phone:'02-312-6301'}],
-  perms:{verify:true,report:true,manage:true},
+   {id:'staff01',pw:'1234',name:'เจ้าหน้าที่ เอ',role:'staff',group:'admin',phone:'02-312-6300'},
+   {id:'staff02',pw:'1234',name:'เจ้าหน้าที่ บี',role:'staff',group:'verifier',phone:'02-312-6301'},
+   {id:'staff03',pw:'1234',name:'เจ้าหน้าที่ ซี',role:'staff',group:'counter',phone:'02-312-6302'}],
+  gperms:{counter:['intake','handover','notify','private'],verifier:['intake','verify','handover','notify','dispose','private','report'],admin:PERMS.map(p=>p[0])},
+  rules:{sepMoney:true},
   cats:['กระเป๋า','เงินสด','ของมีค่า','โทรศัพท์มือถือ','อุปกรณ์ไอที','บัตรต่างๆ','กุญแจ','เอกสาร / หนังสือ','เสื้อผ้า / เครื่องแต่งกาย','เครื่องประดับ / นาฬิกา','แว่นตา','ขวดน้ำ / กระติก','ร่ม','เครื่องเขียน','อุปกรณ์กีฬา','ของใช้ส่วนตัว','อื่น ๆ'],
   places:['อาคารอำนวยการ','อาคารเรียนรวม','อาคารบำรุงรักษา','อาคารโภชนาการ 1','อาคารหอพักอาจารย์','อาคารบรรณสาร','อาคารเฉลิมพระเกียรติ','อาคารหอประชุม','อาคารบริการ','อาคารหอพักนักศึกษา','อาคารโสภณพนิช','อาคารตั้งจิวอัครพงษ์กุล','อาคารอเนกประสงค์','อาคารปฏิบัติการ 5 ชั้น','อาคารกิจกรรมนักศึกษา','อาคารอัฒจันทร์','อาคารโภชนาการ 2','สหกรณ์ออมทรัพย์ มฉก.','ลานจอดรถ','ป้ายรถโดยสาร','ประติมากรรมพระบรมโพธิสมภาร','ประตูเสด็จ','ศาลหลวงปู่ไต้ฮง','ลานโพธิ์','รูปเหมือน ดร.อุเทน เตชะไพบูลย์','ประติมากรรมนกหงส์','สวนสุขภาพ'],
   depots:[{name:'ห้องกิจการนักศึกษา (อาคารกิจกรรมนักศึกษา)',hours:'จ.–ศ. 08:30–16:30'},{name:'เคาน์เตอร์บริการ (อาคารบรรณสาร)',hours:'จ.–ศ. 08:30–16:30'},{name:'ป้อมรักษาความปลอดภัย (ประตู 1)',hours:'ทุกวัน 24 ชั่วโมง'}],

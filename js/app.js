@@ -1,6 +1,6 @@
 /* Rendering, events and actions */
 /* ---------- render ---------- */
-const KEY='lostfound-db-v10';const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}};
+const KEY='lostfound-db-v11';const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}};
 let DIR='';
 function render(top){persist();const c=cur();const bd=$('#phone .bd'),st=bd&&!top?bd.scrollTop:0;
  const keep=top?null:[...document.querySelectorAll('#phone .scr input,#phone .scr select,#phone .scr textarea')].map(x=>[x.id,x.name,x.type,x.value,x.checked]);
@@ -35,7 +35,7 @@ P.addEventListener('change',e=>{const t=e.target;
  if(t.name==='qf'){S.f.qf=$$('input[name=qf]:checked').map(x=>x.value);t.closest('.q')?.classList.remove('err');return}
  if(t.id==='qr'){S.f.qr=t.value;t.closest('.q')?.classList.remove('err');return}
  if(t.id==='rm'){S.f.m=t.value;render()} if(t.id==='ry'){S.f.y=t.value;render()}
- if(t.dataset.role){const u=user(t.dataset.role),r=t.value;modal({kind:'confirm',title:'เปลี่ยนบทบาท?',icon:'b',msg:`เปลี่ยน ${esc(u.name)} เป็น “${r==='staff'?'เจ้าหน้าที่':'ผู้ใช้ทั่วไป'}”`,btn:'เปลี่ยนบทบาท',act:'doRole'});S.modal.uid=u.id;S.modal.role=r}});
+ if(t.dataset.role){const u=user(t.dataset.role),r=t.value,[ro,gr]=r.split(':');if(u.role==='staff'&&u.group==='admin'&&gr!=='admin'&&db.users.filter(x=>x.role==='staff'&&x.group==='admin').length<2){render();return modal({title:'เปลี่ยนไม่ได้',icon:'no',msg:'ต้องมีหัวหน้างานอย่างน้อย 1 คน'})}modal({kind:'confirm',title:'เปลี่ยนบทบาท?',icon:'b',msg:`เปลี่ยน ${esc(u.name)} เป็น “${ro==='staff'?gName(gr):'ผู้ใช้ทั่วไป'}”`,btn:'เปลี่ยนบทบาท',act:'doRole'});S.modal.uid=u.id;S.modal.role=ro;S.modal.group=gr}});
 P.addEventListener('click',e=>{const b=e.target.closest('[data-go],[data-a]');if(!b)return;
  if(b.dataset.a==='ovClose'&&e.target!==b)return;
  if(b.dataset.go){return go(b.dataset.go,{id:b.dataset.id})}
@@ -98,7 +98,8 @@ P.addEventListener('click',e=>{const b=e.target.closest('[data-go],[data-a]');if
    const c=db.claims.find(x=>x.id===cur().id);c.status='rejected';c.verifiedBy=S.me.id;c.reason=r;notify(c.by,`คำขอรับคืน “${item(c.item).name}” ไม่ได้รับอนุมัติ เหตุผล: ${r}`,{s:'track'});logAct('ปฏิเสธคำขอ',`${item(c.item).name} · ${user(c.by).name} · ${r}`);
    S.stack=[{s:'shome'},{s:'pending'}];modal({title:'ปฏิเสธคำขอแล้ว',icon:'no',msg:'แจ้งเหตุผลให้ผู้ขอทราบแล้ว',btn:'กลับไปรายการคำขอ'})},
   export:()=>modal({kind:'export'}),expCSV,expPDF,
-  savePerms:()=>{['verify','report','manage'].forEach(k=>db.perms[k]=$('#pm-'+k).checked);logAct('แก้สิทธิ์การใช้งาน',['verify','report'].map(k=>(k==='verify'?'ตรวจสอบคำขอ':'ออกรายงาน')+(db.perms[k]?' เปิด':' ปิด')).join(', '));S.stack=[{s:'shome'}];render(true);toast('บันทึกสิทธิ์การใช้งานแล้ว')},
+  savePerms:()=>{const old=JSON.stringify(db.gperms),ch=[];GROUPS.forEach(([g])=>{const nw=PERMS.map(p=>p[0]).filter(k=>$(`#pm-${g}-${k}`)?.checked||(g==='admin'&&k==='accounts'));const was=db.gperms[g]||[];PERMS.forEach(([k,t])=>{if(was.includes(k)!==nw.includes(k))ch.push(`${gName(g)}: ${t} ${nw.includes(k)?'เปิด':'ปิด'}`)});db.gperms[g]=nw});
+   const sep=$('#rl-sep').checked;if(!!db.rules?.sepMoney!==sep)ch.push('แยกผู้อนุมัติกับผู้ส่งมอบเงิน '+(sep?'เปิด':'ปิด'));db.rules={...(db.rules||{}),sepMoney:sep};if(ch.length)logAct('แก้สิทธิ์การใช้งาน',ch.join(', '));back();toast('บันทึกสิทธิ์แล้ว')},
   saveSettings:()=>{{const bg=$('#bigAmt'),bv=parseInt(bg?bg.value:(S.f.big??bigAmt()));if(!(bv>0)){if(bg)bg.classList.add('err');else{S.f.sOpen='big';render()}return toast('เกณฑ์เงินต้องมากกว่า 0 บาท')}if(bigAmt()!==bv)logAct('แก้เกณฑ์เงินจำนวนมาก',baht(bigAmt())+' → '+baht(bv));db.bigAmt=bv}const re=$('#ret'),n=parseInt(re?re.value:(S.f.ret??db.retention));if(!(n>0)){if(re)re.classList.add('err');else{S.f.sOpen='ret';render()}return toast('ระยะเวลาต้องมากกว่า 0 วัน')}if(db.retention!==n)logAct('แก้ระยะเวลาเก็บรักษา',db.retention+' → '+n+' วัน');db.retention=n;back();toast('บันทึกการตั้งค่าแล้ว')},
   sTog:()=>{const k=b.dataset.k;{const g=document.getElementById('bigAmt');if(g)S.f.big=g.value}if(S.f.sOpen==='ret'||k==='ret'){const r=document.getElementById('ret');if(r)S.f.ret=r.value}S.f.sOpen=S.f.sOpen===k?'':k;render()},
  addList:()=>b.dataset.k==='depots'?modal({kind:'input2',title:'เพิ่มจุดรับฝาก',k:'depots',i:-1}):modal({kind:'input',title:b.dataset.k==='places'?'เพิ่มสถานที่':'เพิ่มหมวดหมู่',ph:b.dataset.k==='places'?'ชื่อสถานที่':'ชื่อหมวดหมู่',k:b.dataset.k,i:-1}),
@@ -106,7 +107,7 @@ P.addEventListener('click',e=>{const b=e.target.closest('[data-go],[data-a]');if
   delList:()=>{const k=b.dataset.k,i=+b.dataset.i;const nm=k==='depots'?db.depots[i].name:db[k][i];const inUse=db.items.some(it=>k==='places'?it.place===nm:k==='depots'?it.deposit===nm:it.cat===nm);
    if(inUse)return modal({title:'ลบไม่ได้',icon:'no',msg:'มีรายการที่ใช้ข้อมูลนี้อยู่ แก้ไขชื่อแทนการลบ'});
    modal({kind:'confirm',title:'ลบ “'+nm+'”?',icon:'no',msg:'ลบแล้วกู้คืนไม่ได้',btn:'ลบ',cls:'no',act:'doDel'});S.modal.k=k;S.modal.i=i},
-  doRole:()=>{const m=S.modal,u=user(m.uid);u.role=m.role;logAct('เปลี่ยนบทบาท',`${u.name} → ${m.role==='staff'?'เจ้าหน้าที่':'ผู้ใช้ทั่วไป'}`);S.modal=null;render();toast('เปลี่ยนบทบาทของ '+u.name+' แล้ว')},
+  doRole:()=>{const m=S.modal,u=user(m.uid);u.role=m.role;if(m.group)u.group=m.group;else delete u.group;logAct('เปลี่ยนบทบาท',`${u.name} → ${m.role==='staff'?gName(m.group):'ผู้ใช้ทั่วไป'}`);S.modal=null;render();toast('เปลี่ยนบทบาทของ '+u.name+' แล้ว')},
   gotBack:()=>modal({kind:'confirm',title:'ได้ของคืนแล้ว?',icon:'ok',msg:'ระบบจะปิดการแจ้งของหายรายการนี้ และเปลี่ยนสถานะเป็น “ได้คืนแล้ว”',btn:'ยืนยัน',cls:'ok',act:'doGotBack'}),
   doGotBack:()=>{item(cur().id).status='returned';S.stack=[{s:'home'},{s:'mine'}];S.modal=null;render(true);toast('ปิดการแจ้งของหายแล้ว')},
   doDel:()=>{const m=S.modal;logAct('ลบข้อมูลตั้งค่า',m.k==='depots'?db.depots[m.i].name:db[m.k][m.i]);db[m.k].splice(m.i,1);S.modal=null;render();toast('ลบแล้ว')},
