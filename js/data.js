@@ -32,15 +32,20 @@ const I={
 };
 const svgURI=x=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -113 320 427">'+x+'</svg>');
 const BG=c=>`<rect y="-113" width="320" height="427" fill="${c}"/><ellipse cx="160" cy="178" rx="120" ry="10" fill="#000" opacity=".08"/>`;
-const PIC={I7:'images/item-earbuds.jpg?v=202611271014',I1:'images/item-wallet.jpg?v=202611271014',I2:'images/item-phone.jpg?v=202611271014',I3:'images/item-umbrella.jpg?v=202611271014',I4:'images/item-earbuds.jpg?v=202611271014',I5:'images/item-idcard.jpg?v=202611271014',C1:'images/claim-phone.jpg?v=202611271014'};
-const LGCLEAN='images/login-top.jpg?v=202611271014';
-const LGBOT='images/login-bottom.jpg?v=202611271014';
-const LOGO='images/logo.jpg?v=202611271014',APPIC='images/app-icon.jpg?v=202611271014';
+const PIC={I7:'images/item-earbuds.jpg?v=202611271447',I1:'images/item-wallet.jpg?v=202611271447',I2:'images/item-phone.jpg?v=202611271447',I3:'images/item-umbrella.jpg?v=202611271447',I4:'images/item-earbuds.jpg?v=202611271447',I5:'images/item-idcard.jpg?v=202611271447',C1:'images/claim-phone.jpg?v=202611271447'};
+const LGCLEAN='images/login-top.jpg?v=202611271447';
+const LGBOT='images/login-bottom.jpg?v=202611271447';
+const LOGO='images/logo.jpg?v=202611271447',APPIC='images/app-icon.jpg?v=202611271447';
 const imgOf=it=>it.img||PIC[it.id]||'';
 const dueOf=it=>addDays(it.date,db.retention);
 const dueState=it=>{if(it.type!=='found'||it.status==='returned')return'';const d=(new Date(dueOf(it)+'T00:00')-new Date(today()+'T00:00'))/864e5;return d<0?'over':d<=14?'near':''};
 const matchesFor=it=>it.type!=='lost'||it.status==='returned'?[]:db.items.filter(x=>x.type==='found'&&x.status!=='returned'&&x.cat===it.cat&&x.reporter!==it.reporter&&x.date>=addDays(it.date,-3));
-const pendingOther=it=>db.claims.find(c=>c.item===it.id&&c.status==='pending'&&c.by!==S.me.id);
+const pendingOther=it=>db.claims.find(c=>c.item===it.id&&(c.status==='pending'||c.status==='approved')&&c.by!==S.me.id);
+const PCODE={'อาคารอำนวยการ':'1','อาคารเรียนรวม':'2','อาคารบำรุงรักษา':'3','อาคารโภชนาการ 1':'4','อาคารหอพักอาจารย์':'5','อาคารบรรณสาร':'6','อาคารเฉลิมพระเกียรติ':'7','อาคารหอประชุม':'8','อาคารบริการ':'9','อาคารหอพักนักศึกษา':'10','อาคารโสภณพนิช':'11','อาคารตั้งจิวอัครพงษ์กุล':'12','อาคารอเนกประสงค์':'13','อาคารปฏิบัติการ 5 ชั้น':'14','อาคารกิจกรรมนักศึกษา':'15','อาคารอัฒจันทร์':'16','อาคารโภชนาการ 2':'17','สหกรณ์ออมทรัพย์ มฉก.':'18','ลานจอดรถ':'19','ป้ายรถโดยสาร':'20','ประติมากรรมพระบรมโพธิสมภาร':'A','ประตูเสด็จ':'B','ศาลหลวงปู่ไต้ฮง':'C','ลานโพธิ์':'D','รูปเหมือน ดร.อุเทน เตชะไพบูลย์':'E','ประติมากรรมนกหงส์':'F','สวนสุขภาพ':'G'};
+const depotOf=n=>db.depots.find(d=>d.name===n);
+const newCode=()=>'LF-'+String((new Date().getFullYear()+543)%100).padStart(2,'0')+'-'+String(db.codeSeq++).padStart(4,'0');
+const placeLbl=p=>p?(PCODE[p]?PCODE[p]+' · ':'')+p:'';
+const pickBtn=(id,v,ph,list)=>`<input type="hidden" id="${id}" value="${esc(v||'')}"><button type="button" class="fld pick" data-a="pick" data-t="${id}" data-l="${list}" data-ph="${esc(ph)}"><span${v?'':' class="phx"'}>${esc(v?placeLbl(v):ph)}</span>${I.search}</button>`;
 const CLR=c=>(COLORS.find(x=>x[0]===c)||[0,'#ccc'])[1];
 
 let S,db;
@@ -53,21 +58,22 @@ function seed(){
    {id:'staff02',pw:'1234',name:'เจ้าหน้าที่ บี',role:'staff',phone:'02-312-6301'}],
   perms:{verify:true,report:true,manage:true},
   cats:['กระเป๋า','เงิน / ของมีค่า','โทรศัพท์มือถือ','อุปกรณ์ไอที','บัตรต่างๆ','กุญแจ','เอกสาร / หนังสือ','เสื้อผ้า / เครื่องแต่งกาย','เครื่องประดับ / นาฬิกา','แว่นตา','ขวดน้ำ / กระติก','ร่ม','เครื่องเขียน','อุปกรณ์กีฬา','ของใช้ส่วนตัว','อื่น ๆ'],
-  places:['โรงอาหารกลาง','ห้องสมุด','อาคารเรียน 2'],
+  places:['อาคารอำนวยการ','อาคารเรียนรวม','อาคารบำรุงรักษา','อาคารโภชนาการ 1','อาคารหอพักอาจารย์','อาคารบรรณสาร','อาคารเฉลิมพระเกียรติ','อาคารหอประชุม','อาคารบริการ','อาคารหอพักนักศึกษา','อาคารโสภณพนิช','อาคารตั้งจิวอัครพงษ์กุล','อาคารอเนกประสงค์','อาคารปฏิบัติการ 5 ชั้น','อาคารกิจกรรมนักศึกษา','อาคารอัฒจันทร์','อาคารโภชนาการ 2','สหกรณ์ออมทรัพย์ มฉก.','ลานจอดรถ','ป้ายรถโดยสาร','ประติมากรรมพระบรมโพธิสมภาร','ประตูเสด็จ','ศาลหลวงปู่ไต้ฮง','ลานโพธิ์','รูปเหมือน ดร.อุเทน เตชะไพบูลย์','ประติมากรรมนกหงส์','สวนสุขภาพ'],
+  depots:[{name:'ห้องกิจการนักศึกษา (อาคารกิจกรรมนักศึกษา)',hours:'จ.–ศ. 08:30–16:30'},{name:'เคาน์เตอร์บริการ (อาคารบรรณสาร)',hours:'จ.–ศ. 08:30–16:30'},{name:'ป้อมรักษาความปลอดภัย (ประตู 1)',hours:'ทุกวัน 24 ชั่วโมง'}],
   retention:90,
   items:[
-   {id:'I1',type:'found',name:'กระเป๋าสตางค์สีดำ',cat:'กระเป๋า',place:'โรงอาหารกลาง',date:'2026-09-10',secret:{color:'ดำ',feats:['มีรอยขีดข่วน','มีบัตรอยู่ข้างใน']},deposit:'ห้องกิจการนักศึกษา',receivedBy:'staff01',reporter:'670222',status:'waiting'},
-   {id:'I2',type:'found',name:'โทรศัพท์มือถือ เคสสีฟ้า',cat:'โทรศัพท์มือถือ',place:'ห้องสมุด',date:'2026-09-12',secret:{color:'ฟ้า',feats:['มีสติกเกอร์']},deposit:'เคาน์เตอร์ห้องสมุด',receivedBy:'staff02',reporter:'670222',status:'waiting'},
-   {id:'I3',type:'found',name:'ร่มสีน้ำเงิน',cat:'ร่ม',place:'อาคารเรียน 2',date:'2026-09-03',secret:{color:'น้ำเงิน',feats:['ไม่มีจุดเด่น']},deposit:'ห้องกิจการนักศึกษา',receivedBy:'staff01',reporter:'670222',status:'returned'},
-   {id:'I4',type:'lost',name:'หูฟังไร้สายสีขาว',cat:'อุปกรณ์ไอที',place:'ห้องสมุด',date:'2026-09-05',detail:'เคสมีสติกเกอร์หัวใจสีชมพู',reporter:'670111',status:'waiting'},
-   {id:'I5',type:'lost',name:'บัตรนักศึกษา',cat:'บัตรต่างๆ',place:'โรงอาหารกลาง',date:'2026-09-18',detail:'',reporter:'670222',status:'waiting'},
-   {id:'I6',type:'found',name:'กุญแจรถจักรยานยนต์',cat:'กุญแจ',place:'อาคารเรียน 2',date:'2026-08-01',secret:{color:'เงิน',feats:['มีพวงกุญแจ']},deposit:'ห้องกิจการนักศึกษา',receivedBy:'staff01',reporter:'670333',status:'waiting'},
-   {id:'I7',type:'found',name:'หูฟังไร้สาย เคสสีขาว',cat:'อุปกรณ์ไอที',place:'ห้องสมุด',date:'2026-09-08',secret:{color:'ขาว',feats:['มีสติกเกอร์']},deposit:'เคาน์เตอร์ห้องสมุด',receivedBy:'staff02',reporter:'670333',status:'waiting'}],
+   {id:'I1',code:'LF-69-0001',type:'found',name:'กระเป๋าสตางค์สีดำ',cat:'กระเป๋า',place:'อาคารโภชนาการ 1',date:'2026-09-10',secret:{color:'ดำ',feats:['มีรอยขีดข่วน','มีบัตรอยู่ข้างใน']},deposit:'ห้องกิจการนักศึกษา (อาคารกิจกรรมนักศึกษา)',receivedBy:'staff01',reporter:'670222',status:'waiting'},
+   {id:'I2',code:'LF-69-0002',type:'found',name:'โทรศัพท์มือถือ เคสสีฟ้า',cat:'โทรศัพท์มือถือ',place:'อาคารบรรณสาร',date:'2026-09-12',secret:{color:'ฟ้า',feats:['มีสติกเกอร์']},deposit:'เคาน์เตอร์บริการ (อาคารบรรณสาร)',receivedBy:'staff02',reporter:'670222',status:'waiting'},
+   {id:'I3',code:'LF-69-0003',type:'found',name:'ร่มสีน้ำเงิน',cat:'ร่ม',place:'อาคารเรียนรวม',date:'2026-09-03',secret:{color:'น้ำเงิน',feats:['ไม่มีจุดเด่น']},deposit:'ห้องกิจการนักศึกษา (อาคารกิจกรรมนักศึกษา)',receivedBy:'staff01',reporter:'670222',status:'returned'},
+   {id:'I4',code:'LF-69-0004',type:'lost',name:'หูฟังไร้สายสีขาว',cat:'อุปกรณ์ไอที',place:'อาคารบรรณสาร',date:'2026-09-05',detail:'เคสมีสติกเกอร์หัวใจสีชมพู',reporter:'670111',status:'waiting'},
+   {id:'I5',code:'LF-69-0005',type:'lost',name:'บัตรนักศึกษา',cat:'บัตรต่างๆ',place:'อาคารโภชนาการ 1',date:'2026-09-18',detail:'',reporter:'670222',status:'waiting'},
+   {id:'I6',code:'LF-69-0006',type:'found',name:'กุญแจรถจักรยานยนต์',cat:'กุญแจ',place:'อาคารเรียนรวม',date:'2026-08-01',secret:{color:'เงิน',feats:['มีพวงกุญแจ']},deposit:'ห้องกิจการนักศึกษา (อาคารกิจกรรมนักศึกษา)',receivedBy:'staff01',reporter:'670333',status:'waiting'},
+   {id:'I7',code:'LF-69-0007',type:'found',name:'หูฟังไร้สาย เคสสีขาว',cat:'อุปกรณ์ไอที',place:'อาคารบรรณสาร',date:'2026-09-08',secret:{color:'ขาว',feats:['มีสติกเกอร์']},deposit:'เคาน์เตอร์บริการ (อาคารบรรณสาร)',receivedBy:'staff02',reporter:'670333',status:'waiting'}],
   claims:[
-   {id:'C1',item:'I2',by:'670111',date:'2026-09-14',ans:{color:'ฟ้า',feats:['มีสติกเกอร์'],place:'ห้องสมุด',date:'2026-09-12'},note:'เคสมีสติกเกอร์รูปแมว',imgs:[PIC.C1],status:'pending'},
-   {id:'C2',item:'I3',by:'670111',date:'2026-09-05',ans:{color:'น้ำเงิน',feats:['ไม่มีจุดเด่น'],place:'อาคารเรียน 2',date:'2026-09-03'},note:'',imgs:[],status:'approved',verifiedBy:'staff01'},
-   {id:'C3',item:'I1',by:'670222',date:'2026-09-11',ans:{color:'น้ำตาล',feats:['มีพวงกุญแจ'],place:'ห้องสมุด',date:'2026-09-20'},note:'',imgs:[],status:'rejected',verifiedBy:'staff02',reason:'คำตอบไม่ตรงกับลักษณะของสิ่งของ'}],
-  seq:8};
+   {id:'C1',item:'I2',by:'670111',date:'2026-09-14',ans:{color:'ฟ้า',feats:['มีสติกเกอร์'],place:'อาคารบรรณสาร',date:'2026-09-12'},note:'เคสมีสติกเกอร์รูปแมว',imgs:[PIC.C1],status:'pending'},
+   {id:'C2',item:'I3',by:'670111',date:'2026-09-05',ans:{color:'น้ำเงิน',feats:['ไม่มีจุดเด่น'],place:'อาคารเรียนรวม',date:'2026-09-03'},note:'',imgs:[],status:'collected',verifiedBy:'staff01',handedBy:'staff01',handedAt:'2026-09-06 10:15',idChecked:true},
+   {id:'C3',item:'I1',by:'670222',date:'2026-09-11',ans:{color:'น้ำตาล',feats:['มีพวงกุญแจ'],place:'อาคารบรรณสาร',date:'2026-09-20'},note:'',imgs:[],status:'rejected',verifiedBy:'staff02',reason:'คำตอบไม่ตรงกับลักษณะของสิ่งของ'}],
+  seq:8,codeSeq:8};
  S={me:null,stack:[{s:'login'}],modal:null,f:{}};
 }
 const user=id=>db.users.find(u=>u.id===id);
@@ -88,7 +94,7 @@ function match(c){const it=item(c.item),a=c.ans,r=RANGES.find(x=>x.t===a.range),
 const ITEMSTAT={waiting:['รอเจ้าของมารับ','p-wait'],returned:['คืนแล้ว','p-ok']};
 const LOSTSTAT={waiting:['กำลังตามหา','p-b'],returned:['ได้คืนแล้ว','p-ok']};
 const stOf=i=>(i.type==='lost'?LOSTSTAT:ITEMSTAT)[i.status];
-const CLSTAT={pending:['รอตรวจสอบ','p-wait'],approved:['อนุมัติแล้ว','p-ok'],rejected:['ไม่อนุมัติ','p-bad']};
+const CLSTAT={pending:['รอตรวจสอบ','p-wait'],approved:['อนุมัติแล้ว · รอมารับ','p-b'],collected:['รับของแล้ว','p-ok'],rejected:['ไม่อนุมัติ','p-bad']};
 const pill=([t,c])=>`<span class="pill ${c}">${t}</span>`;
 const H=(t,{back=true,right=''}={})=>{if(S.me&&S.stack.length===2&&NAVS[S.me.role].some(x=>x[0]===cur().s))back=false;return `<div class="hd">${back?`<button class="ib" type="button" data-a="back" aria-label="ย้อนกลับ">${I.back}</button>`:''}<h2>${t}</h2>${right}${S.me?signout:''}</div>`};
 const signout=`<button class="so" type="button" data-a="signout">${I.out}<span>ออกจากระบบ</span></button>`;
