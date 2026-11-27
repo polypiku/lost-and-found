@@ -21,30 +21,33 @@ const hello=()=>`<div class="hello"><div class="av">${S.me.role==='staff'?I.veri
 const tile=(go,ic,t,d,badge,wide)=>`<button class="tile${wide?' wide':''}" type="button" data-go="${go}"><span class="ic" data-c="${ic}">${I[ic]}</span><span class="tx"><b>${t}</b><br><small>${d}</small></span>${badge?`<span class="badge">${badge}</span>`:''}</button>`;
 V.home=()=>{const my=db.claims.filter(c=>c.by===S.me.id&&c.status==='pending').length;
  return homeHd('ศูนย์รับฝากของหาย · '+S.me.id)+`<div class="bd home"><button class="qs2" type="button" data-go="search"><span class="qt"><span class="ic">${I.search}</span><span><b>ทำของหายใช่ไหม?</b><small>ค้นหาของที่มีคนเก็บได้ แล้วยื่นขอรับคืน</small></span></span><span class="sfake">${I.search}<span>ค้นหาชื่อสิ่งของ หรือสถานที่</span><i>ค้นหา</i></span></button>
+ ${(()=>{const L=db.items.filter(i=>i.reporter===S.me.id&&i.type==='lost').flatMap(i=>matchesFor(i).map(x=>[i,x]));return L.length?`<button class="mcard" type="button" data-go="detail" data-id="${L[0][0].id}"><span class="ic">${I.spark}</span><span class="tx"><b>อาจพบของที่คุณแจ้งหายแล้ว</b><small>มีของที่พบ ${L.length} รายการ ที่อาจตรงกับ “${esc(L[0][0].name)}”</small></span>${I.chev}</button>`:''})()}
  <div class="sec"><span>บริการ</span></div>
  <div class="tiles">${tile('lost','lost','แจ้งของหาย','บันทึกของที่คุณทำหาย')}${tile('found','found','บันทึกของที่พบ','แจ้งของที่คุณเก็บได้')}
  ${tile('track','track','ติดตามสถานะ','ผลคำขอรับคืนของคุณ',my)}${tile('mine','list','รายการบันทึก','ดูและแก้ไขรายการที่แจ้ง')}</div></div>`};
 V.shome=()=>{const p=db.perms,n=db.claims.filter(c=>c.status==='pending').length;
- const t=[];if(p.verify)t.push(tile('pending','verify','ตรวจสอบคำขอ','อนุมัติหรือปฏิเสธคำขอรับคืน',n,true));if(p.report)t.push(tile('report','report','ออกรายงาน','สรุปรายเดือน ส่งออก Excel / PDF'));if(p.manage)t.push(tile('manage','manage','จัดการระบบ','บัญชี สิทธิ์ และการตั้งค่า'));
+ const due=db.items.filter(i=>dueState(i)),over=due.filter(i=>dueState(i)==='over').length;
+ const t=[];if(due.length)t.push(tile('due','clock','ของครบกำหนดเก็บรักษา',`เกินกำหนด ${over} · ใกล้ครบ ${due.length-over} รายการ`,due.length,true));if(p.verify)t.push(tile('pending','verify','ตรวจสอบคำขอ','อนุมัติหรือปฏิเสธคำขอรับคืน',n,true));if(p.report)t.push(tile('report','report','ออกรายงาน','สรุปรายเดือน ส่งออก Excel / PDF'));if(p.manage)t.push(tile('manage','manage','จัดการระบบ','บัญชี สิทธิ์ และการตั้งค่า'));
  return homeHd('สำหรับเจ้าหน้าที่ · '+S.me.id)+`<div class="bd home">
  <div class="tiles">${t.join('')}</div>${(!p.verify||!p.report||!p.manage)?'<div class="note">'+I.info+'<span>บางเมนูถูกซ่อนตามสิทธิ์ที่ตั้งไว้ในหน้าจัดการระบบ</span></div>':''}</div>`};
 const photoField=(src,label)=>`<div class="field"><span class="lab">${label}</span><div id="phWrap">${src?`<div class="ph" data-a="pickPhoto" role="button" tabindex="0" aria-label="เปลี่ยนรูป" style="cursor:pointer"><img src="${src}" alt="รูปสิ่งของ"><button class="x" type="button" data-a="rmPhoto" aria-label="ลบรูป">${I.x}</button><span class="cap">แตะเพื่อเปลี่ยน</span></div>`:`<button class="up" type="button" data-a="pickPhoto">${I.cam}<span>แนบรูปภาพ</span></button>`}</div><input type="file" id="iImg" accept="image/*" hidden></div>`;
+const consentBox=()=>`<label class="consent" id="iOkBox"><input type="checkbox" id="iOk"><span>ยินยอมให้ระบบเก็บข้อมูล รูปภาพ และเบอร์ติดต่อของฉัน เพื่อใช้ติดตามและคืนสิ่งของเท่านั้น</span></label>`;
 function itemForm(kind,it={}){const f=kind==='found'||it.type==='found';const img=S.f.img!==undefined?S.f.img:(it.img||(it.id?PIC[it.id]:''))||'';
- return `<div class="panel"><div class="field"><label for="iName">ชื่อสิ่งของ <small>(จำเป็น)</small></label><input class="fld" id="iName" placeholder="${f?'เช่น กระเป๋าสตางค์สีดำ':'เช่น หูฟังไร้สายสีขาว'}" value="${esc(it.name)}"></div>
+ return `<div class="panel"><div class="field"><label for="iName">ชื่อสิ่งของ <small>(จำเป็น)</small></label><input class="fld" id="iName" maxlength="60" placeholder="${f?'เช่น กระเป๋าสตางค์สีดำ':'เช่น หูฟังไร้สายสีขาว'}" value="${esc(it.name)}"></div>
  <div class="two"><div class="field"><label for="iCat">หมวดหมู่</label><select class="fld" id="iCat">${opts(db.cats,it.cat||db.cats[0])}</select></div>
  <div class="field"><span class="lab" id="iDateL">${f?'วันที่พบ':'วันที่ทำหาย'}</span>${dateBtn('iDate',it.date||'','iDateL')}</div></div>
  <div class="field"><label for="iPlace">${f?'สถานที่ที่เก็บได้':'สถานที่ที่คาดว่าทำหาย'}</label><select class="fld" id="iPlace"><option value="">เลือกสถานที่</option>${opts(db.places,it.place)}</select></div>
  ${photoField(img,f?'รูปสิ่งของที่พบ <small>(แนะนำ)</small>':'รูปสิ่งของ <small>(ถ้ามี)</small>')}
- <div class="field"><label for="iDetail">${f?'รายละเอียดทั่วไป':'รายละเอียดเพิ่มเติม'} <small>(ไม่บังคับ)</small></label><textarea class="fld" id="iDetail" placeholder="${f?'สิ่งที่ทุกคนเห็นได้ เช่น ขนาด ยี่ห้อ':'เช่น ยี่ห้อ ตำหนิ ของที่อยู่ข้างใน'}">${esc(it.detail||'')}</textarea></div>
+ <div class="field"><label for="iDetail">${f?'รายละเอียดทั่วไป':'รายละเอียดเพิ่มเติม'} <small>(ไม่บังคับ)</small></label><textarea class="fld" id="iDetail" maxlength="300" placeholder="${f?'สิ่งที่ทุกคนเห็นได้ เช่น ขนาด ยี่ห้อ':'เช่น ยี่ห้อ ตำหนิ ของที่อยู่ข้างใน'}">${esc(it.detail||'')}</textarea></div>
 </div>
  ${f?`<div class="panel secret"><div class="ptitle">${I.lock}ข้อมูลลับสำหรับยืนยันเจ้าของ</div><div class="hint" style="margin-top:-6px">ข้อมูลส่วนนี้ไม่แสดงต่อผู้อื่น ใช้เทียบกับคำตอบของผู้ขอรับคืน</div>
   <div class="field"><span class="lab">สีของสิ่งของ</span>${colorSel('iColor',it.secret?.color,'iColorBox')}</div>
   <div class="field"><span class="lab">ลักษณะเด่น <small>(เลือกได้หลายข้อ)</small></span>${grid(FEATS.map(x=>chipC('iF',x,it.secret?.feats?.includes(x))).join(''),2,'iFBox')}</div></div>
  <div class="panel"><div class="ptitle">${I.inbox}การฝากของ</div>
-  <div class="field"><label for="iDep">สถานที่ฝาก</label><input class="fld" id="iDep" placeholder="เช่น ห้องกิจการนักศึกษา" value="${esc(it.deposit||'')}"></div>
+  <div class="field"><label for="iDep">สถานที่ฝาก</label><input class="fld" id="iDep" maxlength="60" placeholder="เช่น ห้องกิจการนักศึกษา" value="${esc(it.deposit||'')}"></div>
   <div class="field"><label for="iStaff">เจ้าหน้าที่ที่รับฝาก</label><select class="fld" id="iStaff"><option value="">เลือกเจ้าหน้าที่</option>${db.users.filter(u=>u.role==='staff').map(u=>`<option value="${u.id}"${it.receivedBy===u.id?' selected':''}>${esc(u.name)}</option>`).join('')}</select></div></div>`:''}`}
-V.lost=()=>H('แจ้งของหาย')+`<div class="bd">${itemForm('lost')}</div><div class="ft"><button class="btn" type="button" data-a="back">ยกเลิก</button><button class="btn pri" type="button" data-a="saveItem" data-k="lost">บันทึกการแจ้ง</button></div>`;
-V.found=()=>H('บันทึกของที่พบ')+`<div class="bd">${itemForm('found')}</div><div class="ft"><button class="btn" type="button" data-a="back">ยกเลิก</button><button class="btn pri" type="button" data-a="saveItem" data-k="found">บันทึกการแจ้ง</button></div>`;
+V.lost=()=>H('แจ้งของหาย')+`<div class="bd">${itemForm('lost')}${consentBox()}</div><div class="ft"><button class="btn" type="button" data-a="back">ยกเลิก</button><button class="btn pri" type="button" data-a="saveItem" data-k="lost">บันทึกการแจ้ง</button></div>`;
+V.found=()=>H('บันทึกของที่พบ')+`<div class="bd">${itemForm('found')}${consentBox()}</div><div class="ft"><button class="btn" type="button" data-a="back">ยกเลิก</button><button class="btn pri" type="button" data-a="saveItem" data-k="found">บันทึกการแจ้ง</button></div>`;
 V.mine=()=>{const L=db.items.filter(i=>i.reporter===S.me.id);
  return H('รายการบันทึก')+`<div class="bd"><div class="note">${I.info}<span>แตะรายการเพื่อแก้ไข รายการที่คืนแล้วแก้ไขไม่ได้</span></div>
  ${L.length?L.map(i=>{const inner=`${thumb(i)}<span class="t"><b>${esc(i.name)}</b><small>${i.type==='lost'?'ของหาย':'ของที่พบ'} · ${thd(i.date)}</small>${pill(stOf(i))}</span>`;return i.status==='returned'?`<div class="item off">${inner}</div>`:`<button class="item" type="button" data-go="edit" data-id="${i.id}">${inner}<span class="chev">${I.pen}</span></button>`}).join(''):empty('list','ยังไม่มีรายการที่คุณแจ้งไว้')}</div>`};
@@ -58,7 +61,7 @@ V.search=()=>{const t=S.f.t||'found',c=S.f.c||'';
  <label class="catsel"><span>${I.list}หมวดหมู่</span><select class="fld" name="sc" aria-label="หมวดหมู่">${['',...db.cats].map(x=>`<option value="${esc(x)}"${x===c?' selected':''}>${esc(x||'ทุกหมวด')}</option>`).join('')}</select></label>
  <div id="res" style="display:flex;flex-direction:column;gap:10px">${searchResults()}</div></div>`};
 V.detail=()=>{const it=item(cur().id),f=it.type==='found',mine=it.reporter===S.me.id;const canClaim=S.me.role==='user'&&f&&!mine&&it.status!=='returned';
- const pend=db.claims.find(c=>c.item===it.id&&c.by===S.me.id&&c.status==='pending');
+ const pend=db.claims.find(c=>c.item===it.id&&c.by===S.me.id&&c.status==='pending'),other=pendingOther(it);
  return H('รายละเอียดรายการ')+`<div class="bd">${imgOf(it)?(hideImg(it)?`<div class="herow"><img class="hero blurimg" src="${imgOf(it)}" alt=""><span class="blurnote">${I.lock}รูปถูกเบลอเพื่อป้องกันการแอบอ้าง<br>เจ้าหน้าที่จะเทียบรูปจริงให้ตอนตรวจสอบ</span></div>`:`<img class="hero" src="${imgOf(it)}" alt="${esc(it.name)}">`):''}
  <div><div style="font-weight:600;font-size:18px">${esc(it.name)}</div><div style="margin-top:6px">${pill(stOf(it))}</div></div>
  <div class="kv"><div><span>ประเภท</span><span>${f?'ของที่พบ':'ของหาย'}</span></div><div><span>หมวดหมู่</span><span>${esc(it.cat)}</span></div>
@@ -68,8 +71,12 @@ V.detail=()=>{const it=item(cur().id),f=it.type==='found',mine=it.reporter===S.m
  ${f?`<div class="note">${I.lock}<span>รายละเอียดที่ใช้ยืนยันความเป็นเจ้าของ เช่น สีและตำหนิ จะไม่แสดงในหน้านี้</span></div>`:''}
  ${!f?`<div class="note">${I.info}<span>หากพบสิ่งของนี้ ติดต่อผู้แจ้งได้ที่ ${esc(user(it.reporter)?.phone||'-')} หรือนำไปฝากที่ห้องกิจการนักศึกษา</span></div>`:''}
  ${mine&&f?`<div class="note">${I.info}<span>คุณเป็นผู้แจ้งรายการนี้ จึงยื่นขอรับคืนไม่ได้</span></div>`:''}
- ${pend?`<div class="note ok">${I.wait}<span>คุณยื่นคำขอรายการนี้แล้วเมื่อ ${thd(pend.date)} กำลังรอเจ้าหน้าที่ตรวจสอบ</span></div>`:''}</div>
- ${canClaim&&!pend?`<div class="ft"><button class="btn pri" type="button" data-a="toClaim">ยื่นคำขอรับของคืน</button></div>`:''}`};
+ ${pend?`<div class="note ok">${I.wait}<span>คุณยื่นคำขอรายการนี้แล้วเมื่อ ${thd(pend.date)} กำลังรอเจ้าหน้าที่ตรวจสอบ</span></div>`:''}
+ ${canClaim&&!pend&&other?`<div class="note">${I.wait}<span>มีผู้ยื่นคำขอรายการนี้แล้ว กำลังรอเจ้าหน้าที่ตรวจสอบ หากคำขอนั้นไม่ได้รับอนุมัติ คุณจะยื่นคำขอได้</span></div>`:''}
+ ${S.me.role==='staff'&&dueState(it)?`<div class="note bad">${I.clock}<span>${dueState(it)==='over'?'เกินกำหนดเก็บรักษาแล้ว':'ใกล้ครบกำหนดเก็บรักษา'} (${thd(dueOf(it))}) ดำเนินการตามระเบียบของมหาวิทยาลัย</span></div>`:''}
+ ${mine&&!f&&matchesFor(it).length?`<div class="sec"><span>ของที่พบที่อาจตรงกัน (${matchesFor(it).length})</span></div>${matchesFor(it).map(x=>`<button class="item" type="button" data-go="detail" data-id="${x.id}">${thumb(x)}<span class="t"><b>${esc(x.name)}</b><small>${esc(x.place)} · ${thd(x.date)}</small>${pill(stOf(x))}</span></button>`).join('')}<div class="hint">ระบบเทียบจากหมวดหมู่และวันที่ กดดูรายละเอียดแล้วยื่นคำขอรับคืนได้</div>`:''}</div>
+ ${mine&&!f&&it.status!=='returned'?`<div class="ft"><button class="btn ok" type="button" data-a="gotBack">${I.ok}ฉันได้ของคืนแล้ว</button></div>`:''}
+ ${canClaim&&!pend&&!other?`<div class="ft"><button class="btn pri" type="button" data-a="toClaim">ยื่นคำขอรับของคืน</button></div>`:''}`};
 V.claim=()=>{const it=item(cur().id),e=S.f.err||{},a=S.f;const imgs=a.cimgs||[];
  return H('ยื่นคำขอรับคืน')+`<div class="bd"><div class="item off" style="opacity:1">${thumb(it)}<span class="t"><b>${esc(it.name)}</b><small>ตอบคำถามเพื่อยืนยันว่าคุณเป็นเจ้าของ</small></span></div>
  <fieldset class="q${e.qc?' err':''}"><legend><span class="num">1</span>สีของสิ่งของ</legend>${colorSel('qc',a.qc)}</fieldset>
@@ -78,7 +85,8 @@ V.claim=()=>{const it=item(cur().id),e=S.f.err||{},a=S.f;const imgs=a.cimgs||[];
  <fieldset class="q${e.qr?' err':''}"><legend><span class="num">4</span>วันที่ทำหาย</legend>${dateBtn('qr',a.qr||'','qrL')}<span class="hint" id="qrL">เลือกวันที่คุณคิดว่าทำของหาย ระบบยอมรับคลาดเคลื่อนได้ไม่เกิน 3 วัน</span></fieldset>
  <fieldset class="q"><legend><span class="num">5</span>รูปถ่ายสิ่งของของคุณ <small>(ถ้ามี ไม่เกิน 3 รูป)</small></legend><div class="hint" style="margin-top:-4px">เช่น รูปเก่าที่เคยถ่ายไว้ หรือรูปที่เห็นสิ่งของชิ้นนี้ ช่วยให้เจ้าหน้าที่ตรวจสอบได้ง่ายขึ้น</div>
   <div class="strip" id="cStrip">${claimStrip(imgs)}</div><input type="file" id="cImg" accept="image/*" multiple hidden></fieldset>
- <div class="field"><label for="qn">หมายเหตุเพิ่มเติม <small>(ไม่บังคับ)</small></label><textarea class="fld" id="qn" placeholder="เช่น จุดสังเกตอื่นที่มีแต่เจ้าของรู้">${esc(a.qn||'')}</textarea></div></div>
+ <div class="field"><label for="qn">หมายเหตุเพิ่มเติม <small>(ไม่บังคับ)</small></label><textarea class="fld" id="qn" placeholder="เช่น จุดสังเกตอื่นที่มีแต่เจ้าของรู้" maxlength="300">${esc(a.qn||'')}</textarea></div>
+ <label class="consent${e.ok?' err':''}" id="cOkBox"><input type="checkbox" id="cOk"${a.cok?' checked':''}><span>ฉันยืนยันว่าเป็นเจ้าของสิ่งของนี้จริง และยินยอมให้เจ้าหน้าที่ใช้คำตอบและรูปที่แนบเพื่อตรวจสอบ</span></label></div>
  <div class="ft"><button class="btn" type="button" data-a="back">ยกเลิก</button><button class="btn pri" type="button" data-a="submitClaim">ส่งคำขอ</button></div>`};
 function claimStrip(imgs){return imgs.map((s,k)=>`<div class="ph"><img src="${s}" alt="รูปที่แนบ ${k+1}"><button class="x" type="button" data-a="rmCImg" data-i="${k}" aria-label="ลบรูปที่ ${k+1}">${I.x}</button></div>`).join('')+(imgs.length<3?`<button class="up" type="button" data-a="pickCImg">${I.cam}<span>เพิ่มรูป</span></button>`:'')}
 const ck=I.ok.replace('stroke-width="1.9"','stroke-width="3.4"'),cx=I.no.replace('stroke-width="1.9"','stroke-width="3.4"');
@@ -103,15 +111,15 @@ V.verify=()=>{const c=db.claims.find(x=>x.id===cur().id),it=item(c.item),m=match
   <figure>${ci.length?`<img src="${ci[0]}" alt="รูปจากผู้ขอ" data-a="zoom" tabindex="0" role="button">`:'<div class="noimg">ผู้ขอไม่ได้แนบรูป</div>'}<figcaption>รูปจากผู้ขอ${ci.length>1?` (1/${ci.length})`:''}</figcaption></figure></div>
   ${ci.length>1?`<div class="strip">${ci.slice(1).map(s=>`<div class="ph"><img src="${s}" alt="รูปจากผู้ขอ" data-a="zoom" tabindex="0" role="button"></div>`).join('')}</div>`:''}<span class="hint">แตะรูปเพื่อขยาย</span></div>
  ${c.note?`<div class="panel" style="gap:4px"><span class="hint">หมายเหตุจากผู้ขอ</span><span>${esc(c.note)}</span></div>`:''}
- <div class="field"><label for="vr">เหตุผล <small>(จำเป็นเมื่อปฏิเสธ)</small></label><input class="fld" id="vr" placeholder="เช่น คำตอบไม่ตรงกับลักษณะของสิ่งของ"></div>
+ <div class="field"><label for="vr">เหตุผล <small>(จำเป็นเมื่อปฏิเสธ)</small></label><input class="fld" id="vr" maxlength="200" placeholder="เช่น คำตอบไม่ตรงกับลักษณะของสิ่งของ"></div>
  <div class="note">${I.info}<span>ก่อนส่งมอบของ ตรวจบัตรของผู้มารับให้ตรงกับผู้ยื่นคำขอ</span></div></div>
  <div class="ft"><button class="btn no" type="button" data-a="reject">${I.no}ปฏิเสธ</button><button class="btn ok" type="button" data-a="approve">${I.ok}อนุมัติ</button></div>`};
-const repData=()=>{const m=+(S.f.m??8),y=+(S.f.y??2026);const inM=d=>{const x=new Date(d+'T00:00');return x.getMonth()===m&&x.getFullYear()===y};
+const repData=()=>{const lastD=db.items.map(i=>i.date).sort().pop()||today();const m=+(S.f.m??(+lastD.slice(5,7)-1)),y=+(S.f.y??+lastD.slice(0,4));const inM=d=>{const x=new Date(d+'T00:00');return x.getMonth()===m&&x.getFullYear()===y};
  const L=db.items.filter(i=>inM(i.date)).sort((a,b)=>a.date.localeCompare(b.date));
  return {m,y,L,lost:L.filter(i=>i.type==='lost').length,found:L.filter(i=>i.type==='found').length,
   claims:db.claims.filter(c=>inM(item(c.item).date)),ret:L.filter(i=>i.status==='returned').length}};
 V.report=()=>{const r=repData();
- return H('รายงานสรุปผล')+`<div class="bd"><div class="two"><select class="fld" id="rm" aria-label="เดือน">${MF().map((t,i)=>`<option value="${i}"${i===r.m?' selected':''}>${t}</option>`).join('')}</select><select class="fld" id="ry" aria-label="ปี">${[2025,2026].map(v=>`<option value="${v}"${v===r.y?' selected':''}>${v+YO()}</option>`).join('')}</select></div>
+ return H('รายงานสรุปผล')+`<div class="bd"><div class="two"><select class="fld" id="rm" aria-label="เดือน">${MF().map((t,i)=>`<option value="${i}"${i===r.m?' selected':''}>${t}</option>`).join('')}</select><select class="fld" id="ry" aria-label="ปี">${[...new Set(db.items.map(i=>+i.date.slice(0,4)).concat(new Date().getFullYear()))].sort().map(v=>`<option value="${v}"${v===r.y?' selected':''}>${v+YO()}</option>`).join('')}</select></div>
  <div class="stats"><div class="stat"><small>แจ้งของหาย</small><b>${r.lost}</b></div><div class="stat"><small>ของที่พบ</small><b>${r.found}</b></div><div class="stat"><small>คำขอรับคืน</small><b>${r.claims.length}</b></div><div class="stat"><small>คืนของแล้ว</small><b style="color:var(--ok)">${r.ret}</b></div></div>
  <div class="sec"><span>รายการในเดือน${MF()[r.m]}</span></div>${r.L.length?r.L.map(i=>`<button class="item" type="button" data-go="rdetail" data-id="${i.id}">${thumb(i)}<span class="t"><b>${esc(i.name)}</b><small>${i.type==='lost'?'ของหาย':'ของที่พบ'} · ${thd(i.date)}</small>${pill(stOf(i))}</span><span class="chev">${I.chev}</span></button>`).join(''):empty('report','ไม่มีรายการในเดือนนี้')}</div>
  <div class="ft"><button class="btn pri" type="button" data-a="export"${r.L.length?'':' disabled style="opacity:.5;cursor:not-allowed"'}>${I.xls}ส่งออกรายงาน</button></div>`};
@@ -133,3 +141,6 @@ V.settings=()=>{const tb=(k,arr,h)=>`<div class="panel" style="padding:4px 14px;
  <div class="sec"><span>หมวดหมู่สิ่งของ</span><button class="btn sm" type="button" data-a="addList" data-k="cats">${I.plus}เพิ่ม</button></div>${tb('cats',db.cats)}
  <div class="sec"><span>ระยะเวลาเก็บรักษาของ</span></div><div class="unit"><input class="fld" id="ret" type="number" min="1" value="${db.retention}" aria-label="ระยะเวลาเก็บรักษาของ (วัน)"><span>วัน</span></div><div class="hint" style="margin-top:-4px">ใช้คำนวณวันที่ “เก็บรักษาถึง” ในหน้ารายละเอียดของที่พบ</div></div>
  <div class="ft"><button class="btn" type="button" data-a="back">ยกเลิก</button><button class="btn pri" type="button" data-a="saveSettings">บันทึก</button></div>`};
+V.due=()=>{const L=db.items.filter(i=>dueState(i)).sort((a,b)=>a.date.localeCompare(b.date));
+ return H('ของครบกำหนดเก็บรักษา')+`<div class="bd"><div class="note">${I.info}<span>ของที่พบเก็บรักษาได้ ${db.retention} วัน (แก้ได้ที่ตั้งค่าทั่วไป) รายการที่เกินกำหนดให้ดำเนินการตามระเบียบของมหาวิทยาลัย</span></div>
+ ${L.length?L.map(i=>`<button class="item" type="button" data-go="rdetail" data-id="${i.id}">${thumb(i)}<span class="t"><b>${esc(i.name)}</b><small>${esc(i.deposit||'-')} · ครบกำหนด ${thd(dueOf(i))}</small>${pill(dueState(i)==='over'?['เกินกำหนด','p-bad']:['ใกล้ครบกำหนด','p-wait'])}</span></button>`).join(''):empty('verify','ไม่มีของที่ใกล้ครบกำหนด')}</div>`};

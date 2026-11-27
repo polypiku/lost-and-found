@@ -27,15 +27,20 @@ const I={
  plus:sv('<path d="M12 5v14M5 12h14"/>'),xls:sv('<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 12l5 5M14 12l-5 5"/>'),
  pdf:sv('<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M8.5 13h7M8.5 16.5h5"/>'),
  box:sv('<path d="M3.5 7.5L12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5L12 12l8.5-4.5M12 12v9"/>'),inbox:sv('<path d="M3 13l3-8h12l3 8v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M3 13h5l1.5 2.5h5L16 13h5"/>'),
- pin:sv('<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>')
+ pin:sv('<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>'),
+ clock:sv('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'),spark:sv('<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>')
 };
 const svgURI=x=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -113 320 427">'+x+'</svg>');
 const BG=c=>`<rect y="-113" width="320" height="427" fill="${c}"/><ellipse cx="160" cy="178" rx="120" ry="10" fill="#000" opacity=".08"/>`;
-const PIC={I1:'images/item-wallet.jpg?v=202611262254',I2:'images/item-phone.jpg?v=202611262254',I3:'images/item-umbrella.jpg?v=202611262254',I4:'images/item-earbuds.jpg?v=202611262254',I5:'images/item-idcard.jpg?v=202611262254',C1:'images/claim-phone.jpg?v=202611262254'};
-const LGCLEAN='images/login-top.jpg?v=202611262254';
-const LGBOT='images/login-bottom.jpg?v=202611262254';
-const LOGO='images/logo.jpg?v=202611262254',APPIC='images/app-icon.jpg?v=202611262254';
+const PIC={I7:'images/item-earbuds.jpg?v=202611271014',I1:'images/item-wallet.jpg?v=202611271014',I2:'images/item-phone.jpg?v=202611271014',I3:'images/item-umbrella.jpg?v=202611271014',I4:'images/item-earbuds.jpg?v=202611271014',I5:'images/item-idcard.jpg?v=202611271014',C1:'images/claim-phone.jpg?v=202611271014'};
+const LGCLEAN='images/login-top.jpg?v=202611271014';
+const LGBOT='images/login-bottom.jpg?v=202611271014';
+const LOGO='images/logo.jpg?v=202611271014',APPIC='images/app-icon.jpg?v=202611271014';
 const imgOf=it=>it.img||PIC[it.id]||'';
+const dueOf=it=>addDays(it.date,db.retention);
+const dueState=it=>{if(it.type!=='found'||it.status==='returned')return'';const d=(new Date(dueOf(it)+'T00:00')-new Date(today()+'T00:00'))/864e5;return d<0?'over':d<=14?'near':''};
+const matchesFor=it=>it.type!=='lost'||it.status==='returned'?[]:db.items.filter(x=>x.type==='found'&&x.status!=='returned'&&x.cat===it.cat&&x.reporter!==it.reporter&&x.date>=addDays(it.date,-3));
+const pendingOther=it=>db.claims.find(c=>c.item===it.id&&c.status==='pending'&&c.by!==S.me.id);
 const CLR=c=>(COLORS.find(x=>x[0]===c)||[0,'#ccc'])[1];
 
 let S,db;
@@ -55,12 +60,14 @@ function seed(){
    {id:'I2',type:'found',name:'โทรศัพท์มือถือ เคสสีฟ้า',cat:'โทรศัพท์มือถือ',place:'ห้องสมุด',date:'2026-09-12',secret:{color:'ฟ้า',feats:['มีสติกเกอร์']},deposit:'เคาน์เตอร์ห้องสมุด',receivedBy:'staff02',reporter:'670222',status:'waiting'},
    {id:'I3',type:'found',name:'ร่มสีน้ำเงิน',cat:'ร่ม',place:'อาคารเรียน 2',date:'2026-09-03',secret:{color:'น้ำเงิน',feats:['ไม่มีจุดเด่น']},deposit:'ห้องกิจการนักศึกษา',receivedBy:'staff01',reporter:'670222',status:'returned'},
    {id:'I4',type:'lost',name:'หูฟังไร้สายสีขาว',cat:'อุปกรณ์ไอที',place:'ห้องสมุด',date:'2026-09-05',detail:'เคสมีสติกเกอร์หัวใจสีชมพู',reporter:'670111',status:'waiting'},
-   {id:'I5',type:'lost',name:'บัตรนักศึกษา',cat:'บัตรต่างๆ',place:'โรงอาหารกลาง',date:'2026-09-18',detail:'',reporter:'670222',status:'waiting'}],
+   {id:'I5',type:'lost',name:'บัตรนักศึกษา',cat:'บัตรต่างๆ',place:'โรงอาหารกลาง',date:'2026-09-18',detail:'',reporter:'670222',status:'waiting'},
+   {id:'I6',type:'found',name:'กุญแจรถจักรยานยนต์',cat:'กุญแจ',place:'อาคารเรียน 2',date:'2026-08-01',secret:{color:'เงิน',feats:['มีพวงกุญแจ']},deposit:'ห้องกิจการนักศึกษา',receivedBy:'staff01',reporter:'670333',status:'waiting'},
+   {id:'I7',type:'found',name:'หูฟังไร้สาย เคสสีขาว',cat:'อุปกรณ์ไอที',place:'ห้องสมุด',date:'2026-09-08',secret:{color:'ขาว',feats:['มีสติกเกอร์']},deposit:'เคาน์เตอร์ห้องสมุด',receivedBy:'staff02',reporter:'670333',status:'waiting'}],
   claims:[
    {id:'C1',item:'I2',by:'670111',date:'2026-09-14',ans:{color:'ฟ้า',feats:['มีสติกเกอร์'],place:'ห้องสมุด',date:'2026-09-12'},note:'เคสมีสติกเกอร์รูปแมว',imgs:[PIC.C1],status:'pending'},
    {id:'C2',item:'I3',by:'670111',date:'2026-09-05',ans:{color:'น้ำเงิน',feats:['ไม่มีจุดเด่น'],place:'อาคารเรียน 2',date:'2026-09-03'},note:'',imgs:[],status:'approved',verifiedBy:'staff01'},
    {id:'C3',item:'I1',by:'670222',date:'2026-09-11',ans:{color:'น้ำตาล',feats:['มีพวงกุญแจ'],place:'ห้องสมุด',date:'2026-09-20'},note:'',imgs:[],status:'rejected',verifiedBy:'staff02',reason:'คำตอบไม่ตรงกับลักษณะของสิ่งของ'}],
-  seq:6};
+  seq:8};
  S={me:null,stack:[{s:'login'}],modal:null,f:{}};
 }
 const user=id=>db.users.find(u=>u.id===id);
