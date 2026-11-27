@@ -486,3 +486,10 @@ details.more[open]{gap:12px}
 .sfind svg{width:16px;height:16px;flex:none}.sfind input{all:unset;flex:1;min-width:0;font-size:14px;color:#1f1d1b}
 .accb .lrow{box-shadow:none!important}.accb .unit{margin:6px 0}
 .accb .lrow[hidden]{display:none!important}
+
+.thumb.money{display:grid;place-items:center;font-size:24px;font-weight:700;color:#1f8f4e;background:#e8f6ee}
+.pls{display:flex;flex-wrap:wrap;gap:4px}
+.cmp td.u{color:var(--muted);white-space:nowrap}
+.lrow.rv{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer;width:100%;box-shadow:none!important}
+.lrow.rv.me .t{font-weight:600}.lrow.rv:last-of-type{border-bottom:0}
+.consent.err{outline:2px solid var(--bad)}
