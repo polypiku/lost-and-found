@@ -12,7 +12,7 @@ function openCal(t){const inp=$('#'+t),v=inp.value||today();const d=new Date(v+'
   else{const ys=[];for(let y=new Date().getFullYear();y>=new Date().getFullYear()-5;y--)ys.push(y);h+=`<div class="cgrid c3">${ys.map(y=>`<button type="button" data-c="y" data-v="${y}" class="${y===C.y?'on':''}">${y+YO()}</button>`).join('')}</div>`}
   h+=`<div class="acts"><button type="button" class="btn" data-c="close">ยกเลิก</button><button type="button" class="btn" data-c="today">วันนี้</button></div>`;box.innerHTML=h};
  const pick=v=>{inp.value=v;const b=P.querySelector(`[data-a=cal][data-t="${t}"]`);if(b){b.querySelector('span').textContent=thLong(v);b.classList.remove('err')}
-  if(t==='qr'){S.f.qr=v;b?.closest('.q')?.classList.remove('err')}ov.remove()};
+  if(t==='qr'){S.f.qr=v;b?.closest('.q')?.classList.remove('err')}if((t==='df'||t==='dt')&&$('#res')){S.f[t]=v;$('#res').innerHTML=searchResults()}ov.remove()};
  ov.addEventListener('click',e=>{e.stopPropagation();if(e.target===ov)return ov.remove();const b=e.target.closest('[data-c]');if(!b||b.disabled)return;const c=b.dataset.c;
   if(c==='prev'){if(C.view==='d'){C.m--;if(C.m<0){C.m=11;C.y--}}else C.y--}
   if(c==='next'){if(C.view==='d'){C.m++;if(C.m>11){C.m=0;C.y++}}else C.y++}

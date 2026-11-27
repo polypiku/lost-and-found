@@ -28,19 +28,26 @@ const I={
  pdf:sv('<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M8.5 13h7M8.5 16.5h5"/>'),
  box:sv('<path d="M3.5 7.5L12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5L12 12l8.5-4.5M12 12v9"/>'),inbox:sv('<path d="M3 13l3-8h12l3 8v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M3 13h5l1.5 2.5h5L16 13h5"/>'),
  pin:sv('<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>'),
- clock:sv('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'),spark:sv('<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>')
+ bell:sv('<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>'),hist:sv('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7.5V12l3 2"/>'),send:sv('<path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/>'),clock:sv('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'),spark:sv('<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>')
 };
 const svgURI=x=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -113 320 427">'+x+'</svg>');
 const BG=c=>`<rect y="-113" width="320" height="427" fill="${c}"/><ellipse cx="160" cy="178" rx="120" ry="10" fill="#000" opacity=".08"/>`;
-const PIC={I7:'images/item-earbuds.jpg?v=202611271447',I1:'images/item-wallet.jpg?v=202611271447',I2:'images/item-phone.jpg?v=202611271447',I3:'images/item-umbrella.jpg?v=202611271447',I4:'images/item-earbuds.jpg?v=202611271447',I5:'images/item-idcard.jpg?v=202611271447',C1:'images/claim-phone.jpg?v=202611271447'};
-const LGCLEAN='images/login-top.jpg?v=202611271447';
-const LGBOT='images/login-bottom.jpg?v=202611271447';
-const LOGO='images/logo.jpg?v=202611271447',APPIC='images/app-icon.jpg?v=202611271447';
+const PIC={I7:'images/item-earbuds.jpg?v=202611271726',I1:'images/item-wallet.jpg?v=202611271726',I2:'images/item-phone.jpg?v=202611271726',I3:'images/item-umbrella.jpg?v=202611271726',I4:'images/item-earbuds.jpg?v=202611271726',I5:'images/item-idcard.jpg?v=202611271726',C1:'images/claim-phone.jpg?v=202611271726'};
+const LGCLEAN='images/login-top.jpg?v=202611271726';
+const LGBOT='images/login-bottom.jpg?v=202611271726';
+const LOGO='images/logo.jpg?v=202611271726',APPIC='images/app-icon.jpg?v=202611271726';
 const imgOf=it=>it.img||PIC[it.id]||'';
 const dueOf=it=>addDays(it.date,db.retention);
-const dueState=it=>{if(it.type!=='found'||it.status==='returned')return'';const d=(new Date(dueOf(it)+'T00:00')-new Date(today()+'T00:00'))/864e5;return d<0?'over':d<=14?'near':''};
-const matchesFor=it=>it.type!=='lost'||it.status==='returned'?[]:db.items.filter(x=>x.type==='found'&&x.status!=='returned'&&x.cat===it.cat&&x.reporter!==it.reporter&&x.date>=addDays(it.date,-3));
+const dueState=it=>{if(it.type!=='found'||it.status!=='waiting')return'';const d=(new Date(dueOf(it)+'T00:00')-new Date(today()+'T00:00'))/864e5;return d<0?'over':d<=14?'near':''};
+const matchesFor=it=>it.type!=='lost'||it.status!=='waiting'?[]:db.items.filter(x=>x.type==='found'&&x.status==='waiting'&&x.cat===it.cat&&x.reporter!==it.reporter&&x.date>=addDays(it.date,-3));
 const pendingOther=it=>db.claims.find(c=>c.item===it.id&&(c.status==='pending'||c.status==='approved')&&c.by!==S.me.id);
+const nowStr=()=>{const n=new Date();return today()+' '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')};
+function notify(to,text,go){db.notifs=db.notifs||[];db.notifs.push({id:'N'+(db.nseq=(db.nseq||0)+1),to,at:nowStr(),text,go,readBy:[]})}
+function logAct(act,detail){db.logs=db.logs||[];db.logs.push({at:nowStr(),by:S.me?.id||'-',act,detail})}
+const myNotifs=()=>(db.notifs||[]).filter(n=>n.to===S.me.id||(n.to==='staff'&&S.me.role==='staff')).slice().reverse();
+const unread=()=>S.me?myNotifs().filter(n=>!n.readBy.includes(S.me.id)).length:0;
+const bellBtn=()=>{const n=unread();return `<button class="ib bell" type="button" data-go="notifs" aria-label="การแจ้งเตือน${n?` (${n} ใหม่)`:''}">${I.bell}${n?`<span class="bdg">${n}</span>`:''}</button>`};
+const DISP=['ส่งต่อหน่วยงานที่เกี่ยวข้อง','บริจาค','ทำลาย','อื่น ๆ'];
 const PCODE={'อาคารอำนวยการ':'1','อาคารเรียนรวม':'2','อาคารบำรุงรักษา':'3','อาคารโภชนาการ 1':'4','อาคารหอพักอาจารย์':'5','อาคารบรรณสาร':'6','อาคารเฉลิมพระเกียรติ':'7','อาคารหอประชุม':'8','อาคารบริการ':'9','อาคารหอพักนักศึกษา':'10','อาคารโสภณพนิช':'11','อาคารตั้งจิวอัครพงษ์กุล':'12','อาคารอเนกประสงค์':'13','อาคารปฏิบัติการ 5 ชั้น':'14','อาคารกิจกรรมนักศึกษา':'15','อาคารอัฒจันทร์':'16','อาคารโภชนาการ 2':'17','สหกรณ์ออมทรัพย์ มฉก.':'18','ลานจอดรถ':'19','ป้ายรถโดยสาร':'20','ประติมากรรมพระบรมโพธิสมภาร':'A','ประตูเสด็จ':'B','ศาลหลวงปู่ไต้ฮง':'C','ลานโพธิ์':'D','รูปเหมือน ดร.อุเทน เตชะไพบูลย์':'E','ประติมากรรมนกหงส์':'F','สวนสุขภาพ':'G'};
 const depotOf=n=>db.depots.find(d=>d.name===n);
 const newCode=()=>'LF-'+String((new Date().getFullYear()+543)%100).padStart(2,'0')+'-'+String(db.codeSeq++).padStart(4,'0');
@@ -73,7 +80,17 @@ function seed(){
    {id:'C1',item:'I2',by:'670111',date:'2026-09-14',ans:{color:'ฟ้า',feats:['มีสติกเกอร์'],place:'อาคารบรรณสาร',date:'2026-09-12'},note:'เคสมีสติกเกอร์รูปแมว',imgs:[PIC.C1],status:'pending'},
    {id:'C2',item:'I3',by:'670111',date:'2026-09-05',ans:{color:'น้ำเงิน',feats:['ไม่มีจุดเด่น'],place:'อาคารเรียนรวม',date:'2026-09-03'},note:'',imgs:[],status:'collected',verifiedBy:'staff01',handedBy:'staff01',handedAt:'2026-09-06 10:15',idChecked:true},
    {id:'C3',item:'I1',by:'670222',date:'2026-09-11',ans:{color:'น้ำตาล',feats:['มีพวงกุญแจ'],place:'อาคารบรรณสาร',date:'2026-09-20'},note:'',imgs:[],status:'rejected',verifiedBy:'staff02',reason:'คำตอบไม่ตรงกับลักษณะของสิ่งของ'}],
-  seq:8,codeSeq:8};
+  seq:8,codeSeq:8,
+  notifs:[
+   {id:'N1',to:'670111',at:'2026-09-06 09:00',text:'คำขอรับคืน “ร่มสีน้ำเงิน” ได้รับอนุมัติ มารับของได้ที่ห้องกิจการนักศึกษา',go:{s:'track'},readBy:['670111']},
+   {id:'N2',to:'670111',at:'2026-09-08 15:20',text:'อาจพบของที่คุณแจ้งหาย: “หูฟังไร้สาย เคสสีขาว” ตรงกับ “หูฟังไร้สายสีขาว”',go:{s:'detail',id:'I4'},readBy:[]},
+   {id:'N3',to:'staff',at:'2026-09-14 11:05',text:'มีคำขอรับคืนใหม่: “โทรศัพท์มือถือ เคสสีฟ้า” จาก สมหญิง รักเรียน',go:{s:'verify',id:'C1'},readBy:[]}],
+  logs:[
+   {at:'2026-09-03 10:12',by:'staff01',act:'รับฝากของ',detail:'ร่มสีน้ำเงิน (LF-69-0003)'},
+   {at:'2026-09-05 14:30',by:'staff01',act:'อนุมัติคำขอ',detail:'ร่มสีน้ำเงิน · สมหญิง รักเรียน'},
+   {at:'2026-09-06 10:15',by:'staff01',act:'ส่งมอบของ',detail:'ร่มสีน้ำเงิน (LF-69-0003) ให้ สมหญิง รักเรียน'},
+   {at:'2026-09-11 16:02',by:'staff02',act:'ปฏิเสธคำขอ',detail:'กระเป๋าสตางค์สีดำ · สมชาย ใจดี · คำตอบไม่ตรงกับลักษณะของสิ่งของ'}],
+  nseq:4};
  S={me:null,stack:[{s:'login'}],modal:null,f:{}};
 }
 const user=id=>db.users.find(u=>u.id===id);
@@ -91,12 +108,12 @@ function match(c){const it=item(c.item),a=c.ans,r=RANGES.find(x=>x.t===a.range),
   ['สถานที่',a.place,it.place,a.place===it.place],
   ['วันที่ทำหาย',a.date?thd(a.date):a.range,thd(it.date),a.date?Math.abs((new Date(a.date+'T00:00')-d)/864e5)<=3:(!!r&&d>=r.a&&d<=r.b)]];
  return {res,score:res.filter(x=>x[3]).length}}
-const ITEMSTAT={waiting:['รอเจ้าของมารับ','p-wait'],returned:['คืนแล้ว','p-ok']};
+const ITEMSTAT={waiting:['รอเจ้าของมารับ','p-wait'],returned:['คืนแล้ว','p-ok'],disposed:['จัดการตามระเบียบแล้ว','p-n']};
 const LOSTSTAT={waiting:['กำลังตามหา','p-b'],returned:['ได้คืนแล้ว','p-ok']};
 const stOf=i=>(i.type==='lost'?LOSTSTAT:ITEMSTAT)[i.status];
 const CLSTAT={pending:['รอตรวจสอบ','p-wait'],approved:['อนุมัติแล้ว · รอมารับ','p-b'],collected:['รับของแล้ว','p-ok'],rejected:['ไม่อนุมัติ','p-bad']};
 const pill=([t,c])=>`<span class="pill ${c}">${t}</span>`;
-const H=(t,{back=true,right=''}={})=>{if(S.me&&S.stack.length===2&&NAVS[S.me.role].some(x=>x[0]===cur().s))back=false;return `<div class="hd">${back?`<button class="ib" type="button" data-a="back" aria-label="ย้อนกลับ">${I.back}</button>`:''}<h2>${t}</h2>${right}${S.me?signout:''}</div>`};
+const H=(t,{back=true,right=''}={})=>{if(S.me&&S.stack.length===2&&NAVS[S.me.role].some(x=>x[0]===cur().s))back=false;return `<div class="hd">${back?`<button class="ib" type="button" data-a="back" aria-label="ย้อนกลับ">${I.back}</button>`:''}<h2>${t}</h2>${right}${S.me&&cur().s!=='notifs'?bellBtn():''}${S.me?signout:''}</div>`};
 const signout=`<button class="so" type="button" data-a="signout">${I.out}<span>ออกจากระบบ</span></button>`;
 const opts=(arr,sel)=>arr.map(x=>`<option${x===sel?' selected':''}>${esc(x)}</option>`).join('');
 const hideImg=it=>it.type==='found'&&S.me&&S.me.role!=='staff'&&it.reporter!==S.me.id;

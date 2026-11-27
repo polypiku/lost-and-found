@@ -1,6 +1,6 @@
 /* Rendering, events and actions */
 /* ---------- render ---------- */
-const KEY='lostfound-db-v8';const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}};
+const KEY='lostfound-db-v9';const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}};
 let DIR='';
 function render(top){persist();const c=cur();const bd=$('#phone .bd'),st=bd&&!top?bd.scrollTop:0;
  const keep=top?null:[...document.querySelectorAll('#phone .scr input,#phone .scr select,#phone .scr textarea')].map(x=>[x.id,x.name,x.type,x.value,x.checked]);
@@ -44,9 +44,17 @@ P.addEventListener('click',e=>{const b=e.target.closest('[data-go],[data-a]');if
   lang:()=>{LANG=b.dataset.v;try{localStorage.setItem('lf-lang',LANG)}catch(e){}document.documentElement.lang=LANG;S.f.lu=val('lu');S.f.lp=val('lp');render();drawSpring()},
   cal:()=>openCal(b.dataset.t),
   pick:()=>openPick(b),
+  clearF:()=>{S.f.sp='';S.f.df='';S.f.dt='';render()},
+  readAll:()=>{myNotifs().forEach(n=>{if(!n.readBy.includes(S.me.id))n.readBy.push(S.me.id)});render()},
+  openN:()=>{const n=db.notifs.find(x=>x.id===b.dataset.id);if(!n.readBy.includes(S.me.id))n.readBy.push(S.me.id);const g=n.go||{};if(g.s==='verify'&&!db.claims.some(c=>c.id===g.id&&c.status==='pending'))return go('pending');if(g.s==='track'||g.s==='pending'){S.stack=[{s:S.me.role==='staff'?'shome':'home'},{s:g.s}];S.f={};DIR='fwd';return render(true)}if(g.s)return go(g.s,{id:g.id});render()},
+  notifyOwner:()=>modal({kind:'owner'}),
+  doNotifyOwner:()=>{const id=val('oId'),u=user(id),it=item(cur().id);if(!u){$('#oId').classList.add('err');return toast('ไม่พบบัญชีรหัสนี้')}
+   notify(u.id,`มีของที่อาจเป็นของคุณ: “${it.name}” รับได้ที่ ${it.deposit} (รหัส ${it.code}) กรุณายื่นคำขอรับคืนเพื่อยืนยันตัวตน`,{s:'detail',id:it.id});logAct('แจ้งเจ้าของ',`${it.name} (${it.code}) → ${u.name}`);S.modal=null;render();toast('ส่งแจ้งเตือนถึง '+u.name+' แล้ว')},
+  dispose:()=>modal({kind:'dispose'}),
+  doDispose:()=>{const a=$('input[name=dsp]:checked')?.value;if(!a)return toast('กรุณาเลือกวิธีจัดการ');const it=item(cur().id);it.status='disposed';it.disposal={action:a,note:val('dNote'),by:S.me.id,at:nowStr()};logAct('จัดการของเกินกำหนด',`${it.name} (${it.code}) · ${a}`);S.modal=null;render();toast('บันทึกการจัดการแล้ว')},
   label:()=>printLabel(item(cur().id)),
   handover:()=>{if(!$('#hOk').checked){$('#hOkBox').classList.add('err');return toast('กรุณาตรวจบัตรและติ๊กยืนยันก่อน')}
-   const c=db.claims.find(x=>x.id===cur().id),it=item(c.item),n=new Date();c.status='collected';c.handedBy=S.me.id;c.handedAt=today()+' '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');c.idChecked=true;it.status='returned';
+   const c=db.claims.find(x=>x.id===cur().id),it=item(c.item),n=new Date();c.status='collected';c.handedBy=S.me.id;c.handedAt=today()+' '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');c.idChecked=true;it.status='returned';notify(c.by,`รับ “${it.name}” เรียบร้อยแล้ว ขอบคุณที่ใช้บริการ`,{s:'track'});logAct('ส่งมอบของ',`${it.name} (${it.code||''}) ให้ ${user(c.by).name}`);
    S.stack=[{s:'shome'},{s:'pending'}];modal({title:'ส่งมอบเรียบร้อย',icon:'ok',msg:`บันทึกการคืน ${esc(it.name)} (${esc(it.code||'')})<br>ให้ ${esc(user(c.by).name)} แล้ว`,btn:'กลับไปรายการคำขอ'})},
   tab:()=>{const v=b.dataset.v,h=S.me.role==='staff'?'shome':'home';if(cur().s===v)return;S.stack=v===h?[{s:h}]:[{s:h},{s:v}];S.f={};S.modal=null;DIR='fade';render(true)},mClose:()=>{S.modal=null;render()},ovClose:()=>{S.modal=null;render()},
   signout:()=>modal({kind:'confirm',title:'ออกจากระบบ',icon:'b',msg:'ต้องการออกจากระบบใช่หรือไม่',btn:'ออกจากระบบ',act:'doSignout'}),
@@ -62,41 +70,42 @@ P.addEventListener('click',e=>{const b=e.target.closest('[data-go],[data-a]');if
   saveItem:()=>saveItem(b.dataset.k),
   saveEdit:()=>saveItem(null,item(cur().id)),
   toClaim:()=>{const it=item(cur().id);
-   if(it.status==='returned'||db.claims.some(c=>c.item===it.id&&c.status==='collected'))return modal({title:'ทำรายการไม่ได้',icon:'no',msg:'รายการนี้ถูกดำเนินการคืนของแล้ว',btn:'กลับหน้าหลัก',act:'toHome'});
+   if(it.status!=='waiting'||db.claims.some(c=>c.item===it.id&&c.status==='collected'))return modal({title:'ทำรายการไม่ได้',icon:'no',msg:'รายการนี้ถูกดำเนินการคืนของแล้ว',btn:'กลับหน้าหลัก',act:'toHome'});
    if(pendingOther(it))return modal({title:'มีผู้ยื่นคำขอแล้ว',icon:'wait',msg:'รายการนี้กำลังรอเจ้าหน้าที่ตรวจสอบคำขอของผู้อื่น<br>หากคำขอนั้นไม่ได้รับอนุมัติ คุณจะยื่นคำขอได้'});
    go('claim',{id:it.id})},
   submitClaim:()=>{const it=item(cur().id),f=S.f;f.qn=val('qn');f.qr=val('qr');
    const err={qc:!f.qc,qf:!(f.qf||[]).length,qp:!f.qp,qr:!f.qr,ok:!$('#cOk')?.checked};f.cok=!err.ok;
    if(pendingOther(it))return modal({title:'มีผู้ยื่นคำขอแล้ว',icon:'wait',msg:'รายการนี้มีคำขอของผู้อื่นรอตรวจสอบอยู่'});
    if(Object.values(err).some(Boolean)){S.f.err=err;render();const first=$('#phone .q.err');first?.scrollIntoView({block:'center'});return modal({title:'ตอบคำถามไม่ครบ',icon:'no',msg:Object.entries(err).every(([k,v])=>k==='ok'||!v)?'กรุณายืนยันและให้ความยินยอมก่อนส่งคำขอ':'กรุณาตอบข้อที่มีกรอบสีแดงให้ครบ',btn:'กลับไปตอบ'})}
+   notify('staff',`มีคำขอรับคืนใหม่: “${it.name}” จาก ${S.me.name}`,{s:'verify',id:'C'+db.seq});
    db.claims.push({id:'C'+(db.seq++),item:it.id,by:S.me.id,date:today(),ans:{color:f.qc,feats:f.qf,place:f.qp,date:f.qr},note:f.qn,imgs:f.cimgs||[],status:'pending'});
    S.stack=[{s:'home'}];S.f={};modal({title:'ส่งคำขอแล้ว',icon:'wait',msg:'เจ้าหน้าที่จะตรวจสอบคำตอบ'+((f.cimgs||[]).length?'และรูปที่แนบ':'')+'<br>ติดตามผลได้ที่เมนู “ติดตามสถานะ”',btn:'ไปที่ติดตามสถานะ',act:'toTrack'})},
   toTrack:()=>{S.stack=[{s:'home'},{s:'track'}];S.modal=null;render(true)},
   approve:()=>modal({kind:'confirm',title:'อนุมัติคำขอนี้?',icon:'ok',msg:'ระบบจะแจ้งผู้ขอให้มารับของ สถานะของจะเปลี่ยนเป็น “คืนแล้ว” เมื่อยืนยันส่งมอบ',btn:'อนุมัติ',cls:'ok',act:'doApprove'}),
-  doApprove:()=>{const c=db.claims.find(x=>x.id===cur().id);c.status='approved';c.verifiedBy=S.me.id;
+  doApprove:()=>{const c=db.claims.find(x=>x.id===cur().id);c.status='approved';c.verifiedBy=S.me.id;{const it=item(c.item);notify(c.by,`คำขอรับคืน “${it.name}” ได้รับอนุมัติ มารับของได้ที่ ${it.deposit} แจ้งรหัส ${it.code}`,{s:'track'});logAct('อนุมัติคำขอ',`${it.name} · ${user(c.by).name}`)}
    db.claims.filter(x=>x.item===c.item&&x.status==='pending').forEach(x=>{x.status='rejected';x.verifiedBy=S.me.id;x.reason='มีผู้ได้รับอนุมัติรายการนี้แล้ว'});
    S.stack=[{s:'shome'},{s:'pending'}];modal({title:'อนุมัติสำเร็จ',icon:'ok',msg:'แจ้งผู้ขอให้มารับของแล้ว<br>เมื่อเจ้าของมารับ กด “ยืนยันส่งมอบ” ในรายการ “รอมารับของ”',btn:'กลับไปรายการคำขอ'})},
   reject:()=>{const r=val('vr');if(!r){const x=$('#vr');x.classList.add('err');x.focus();x.scrollIntoView({block:'center'});return toast('กรุณากรอกเหตุผลก่อนปฏิเสธ')}
-   const c=db.claims.find(x=>x.id===cur().id);c.status='rejected';c.verifiedBy=S.me.id;c.reason=r;
+   const c=db.claims.find(x=>x.id===cur().id);c.status='rejected';c.verifiedBy=S.me.id;c.reason=r;notify(c.by,`คำขอรับคืน “${item(c.item).name}” ไม่ได้รับอนุมัติ เหตุผล: ${r}`,{s:'track'});logAct('ปฏิเสธคำขอ',`${item(c.item).name} · ${user(c.by).name} · ${r}`);
    S.stack=[{s:'shome'},{s:'pending'}];modal({title:'ปฏิเสธคำขอแล้ว',icon:'no',msg:'แจ้งเหตุผลให้ผู้ขอทราบแล้ว',btn:'กลับไปรายการคำขอ'})},
   export:()=>modal({kind:'export'}),expCSV,expPDF,
-  savePerms:()=>{['verify','report','manage'].forEach(k=>db.perms[k]=$('#pm-'+k).checked);S.stack=[{s:'shome'}];render(true);toast('บันทึกสิทธิ์การใช้งานแล้ว')},
-  saveSettings:()=>{const n=parseInt(val('ret'));if(!(n>0)){$('#ret').classList.add('err');return toast('ระยะเวลาต้องมากกว่า 0 วัน')}db.retention=n;back();toast('บันทึกการตั้งค่าแล้ว')},
+  savePerms:()=>{['verify','report','manage'].forEach(k=>db.perms[k]=$('#pm-'+k).checked);logAct('แก้สิทธิ์การใช้งาน',['verify','report'].map(k=>(k==='verify'?'ตรวจสอบคำขอ':'ออกรายงาน')+(db.perms[k]?' เปิด':' ปิด')).join(', '));S.stack=[{s:'shome'}];render(true);toast('บันทึกสิทธิ์การใช้งานแล้ว')},
+  saveSettings:()=>{const n=parseInt(val('ret'));if(!(n>0)){$('#ret').classList.add('err');return toast('ระยะเวลาต้องมากกว่า 0 วัน')}if(db.retention!==n)logAct('แก้ระยะเวลาเก็บรักษา',db.retention+' → '+n+' วัน');db.retention=n;back();toast('บันทึกการตั้งค่าแล้ว')},
   addList:()=>b.dataset.k==='depots'?modal({kind:'input2',title:'เพิ่มจุดรับฝาก',k:'depots',i:-1}):modal({kind:'input',title:b.dataset.k==='places'?'เพิ่มสถานที่':'เพิ่มหมวดหมู่',ph:b.dataset.k==='places'?'ชื่อสถานที่':'ชื่อหมวดหมู่',k:b.dataset.k,i:-1}),
   editList:()=>{const k=b.dataset.k,i=+b.dataset.i;if(k==='depots')return modal({kind:'input2',title:'แก้ไขจุดรับฝาก',k,i,val:db.depots[i].name,val2:db.depots[i].hours});modal({kind:'input',title:k==='places'?'แก้ไขสถานที่':'แก้ไขหมวดหมู่',val:db[k][i],k,i})},
   delList:()=>{const k=b.dataset.k,i=+b.dataset.i;const nm=k==='depots'?db.depots[i].name:db[k][i];const inUse=db.items.some(it=>k==='places'?it.place===nm:k==='depots'?it.deposit===nm:it.cat===nm);
    if(inUse)return modal({title:'ลบไม่ได้',icon:'no',msg:'มีรายการที่ใช้ข้อมูลนี้อยู่ แก้ไขชื่อแทนการลบ'});
    modal({kind:'confirm',title:'ลบ “'+nm+'”?',icon:'no',msg:'ลบแล้วกู้คืนไม่ได้',btn:'ลบ',cls:'no',act:'doDel'});S.modal.k=k;S.modal.i=i},
-  doRole:()=>{const m=S.modal,u=user(m.uid);u.role=m.role;S.modal=null;render();toast('เปลี่ยนบทบาทของ '+u.name+' แล้ว')},
+  doRole:()=>{const m=S.modal,u=user(m.uid);u.role=m.role;logAct('เปลี่ยนบทบาท',`${u.name} → ${m.role==='staff'?'เจ้าหน้าที่':'ผู้ใช้ทั่วไป'}`);S.modal=null;render();toast('เปลี่ยนบทบาทของ '+u.name+' แล้ว')},
   gotBack:()=>modal({kind:'confirm',title:'ได้ของคืนแล้ว?',icon:'ok',msg:'ระบบจะปิดการแจ้งของหายรายการนี้ และเปลี่ยนสถานะเป็น “ได้คืนแล้ว”',btn:'ยืนยัน',cls:'ok',act:'doGotBack'}),
   doGotBack:()=>{item(cur().id).status='returned';S.stack=[{s:'home'},{s:'mine'}];S.modal=null;render(true);toast('ปิดการแจ้งของหายแล้ว')},
-  doDel:()=>{const m=S.modal;db[m.k].splice(m.i,1);S.modal=null;render();toast('ลบแล้ว')},
+  doDel:()=>{const m=S.modal;logAct('ลบข้อมูลตั้งค่า',m.k==='depots'?db.depots[m.i].name:db[m.k][m.i]);db[m.k].splice(m.i,1);S.modal=null;render();toast('ลบแล้ว')},
   mConfirm:()=>{const m=S.modal,v=val('mIn');if(!v){$('#mIn').classList.add('err');return}
    if(m.k==='depots'){const h=val('mIn2')||'-';if(db.depots.some((x,j)=>x.name===v&&j!==m.i)){$('#mIn').classList.add('err');return toast('มีชื่อนี้อยู่แล้ว')}
-    if(m.i<0)db.depots.push({name:v,hours:h});else{const old=db.depots[m.i].name;db.depots[m.i]={name:v,hours:h};db.items.forEach(it=>{if(it.deposit===old)it.deposit=v})}S.modal=null;render();return toast('บันทึกแล้ว')}
+    logAct(m.i<0?'เพิ่มจุดรับฝาก':'แก้จุดรับฝาก',v+' · '+h);if(m.i<0)db.depots.push({name:v,hours:h});else{const old=db.depots[m.i].name;db.depots[m.i]={name:v,hours:h};db.items.forEach(it=>{if(it.deposit===old)it.deposit=v})}S.modal=null;render();return toast('บันทึกแล้ว')}
    if(db[m.k].some((x,j)=>x===v&&j!==m.i)){$('#mIn').classList.add('err');return toast('มีชื่อนี้อยู่แล้ว')}
    if(m.i<0)db[m.k].push(v);else{const old=db[m.k][m.i];db[m.k][m.i]=v;db.items.forEach(it=>{if(m.k==='places'&&it.place===old)it.place=v;if(m.k==='cats'&&it.cat===old)it.cat=v})}
-   S.modal=null;render();toast('บันทึกแล้ว')}
+   logAct(m.i<0?'เพิ่มข้อมูลตั้งค่า':'แก้ข้อมูลตั้งค่า',v);S.modal=null;render();toast('บันทึกแล้ว')}
  };
  A[a]&&A[a]();});
 function saveItem(kind,it){const found=kind==='found'||it?.type==='found';
@@ -108,7 +117,8 @@ function saveItem(kind,it){const found=kind==='found'||it?.type==='found';
  const data={name,cat:val('iCat'),place:val('iPlace'),date,detail:val('iDetail')};if(found){data.secret={color,feats};data.deposit=dep;data.receivedBy=stf;if($('#bName')&&(val('bName')||val('bPhone')))data.bringer={name:val('bName'),phone:val('bPhone')}}
  if(S.f.img!==undefined)data.img=S.f.img;
  if(it){if(data.img==='')delete it.img;Object.assign(it,data);S.stack=[{s:S.me.role==='staff'?'shome':'home'},{s:'mine'}];S.f={};return modal({title:'บันทึกการแก้ไขแล้ว',icon:'ok',msg:'ข้อมูลรายการถูกอัปเดตแล้ว'})}
- const code=newCode();db.items.push({id:'I'+(db.seq++),code,type:kind,reporter:S.me.id,status:'waiting',...data});
+ const code=newCode(),nit={id:'I'+(db.seq++),code,type:kind,reporter:S.me.id,status:'waiting',...data};db.items.push(nit);
+ if(kind==='found'){db.items.filter(x=>x.type==='lost'&&matchesFor(x).includes(nit)).forEach(x=>notify(x.reporter,`อาจพบของที่คุณแจ้งหาย: “${nit.name}” ตรงกับ “${x.name}”`,{s:'detail',id:x.id}));if(S.me.role==='staff')logAct('รับฝากของ',`${nit.name} (${code})`)}
  S.f={};modal({title:kind==='lost'?'แจ้งของหายสำเร็จ':'บันทึกของที่พบสำเร็จ',icon:'ok',msg:kind==='lost'?'ระบบบันทึกการแจ้งของหายแล้ว<br>ดูหรือแก้ไขได้ที่ “รายการบันทึก”':S.me.role==='staff'?`รหัสรายการ <b>${code}</b><br>พิมพ์ป้ายติดของได้ที่หน้ารายงาน → ข้อมูลรายการ`:`รหัสรายการ <b>${code}</b><br>ขอบคุณที่ช่วยเหลือ กรุณานำของไปฝากตามจุดที่เลือก`,btn:'กลับหน้าหลัก',act:'toHome'})}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){const cv=$('#phone .ov .cal');if(cv)return cv.closest('.ov').remove();const z=$('.zoom');if(z)return z.remove();if(S.modal){S.modal=null;render()}}
  if((e.key==='Enter'||e.key===' ')&&e.target.matches('img[data-a=zoom]')){e.preventDefault();e.target.click()}});
