@@ -510,3 +510,5 @@ details.more[open]{gap:12px}
 .ck input:checked+i{background:#e41d30;border-color:#e41d30}
 .ck input:checked+i:after{content:'';width:10px;height:6px;border:2.5px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
 .ck input:disabled+i{opacity:.5;cursor:not-allowed}.ck input:focus-visible+i{outline:2px solid #e41d30;outline-offset:2px}
+
+.item b.code{font-variant-numeric:tabular-nums;letter-spacing:.3px}
