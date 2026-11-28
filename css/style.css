@@ -512,3 +512,4 @@ details.more[open]{gap:12px}
 .ck input:disabled+i{opacity:.5;cursor:not-allowed}.ck input:focus-visible+i{outline:2px solid #e41d30;outline-offset:2px}
 
 .item b.code{font-variant-numeric:tabular-nums;letter-spacing:.3px}
+.tcode{display:inline-block;margin-top:4px;background:#e8f6ee;color:#16683a;border-radius:8px;padding:2px 8px;font-size:12.5px;font-weight:600;letter-spacing:.3px}
